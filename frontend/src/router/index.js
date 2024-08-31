@@ -2,16 +2,16 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../components/Login.vue';
 import Register from '../components/Register.vue';
 import Home from '../components/Home.vue';
+import AuthPage from "@/components/AuthPage.vue";
 
 const routes = [
-    { path: '/login', component: Login },
-    { path: '/register', component: Register },
+    { path: '/auth', component: AuthPage },
     {
         path: '/home',
         component: Home,
         meta: { requiresAuth: true }, // 需要身份验证
     },
-    { path: '/', redirect: '/login' },
+    { path: '/', redirect: '/auth' },
 ];
 
 const router = createRouter({

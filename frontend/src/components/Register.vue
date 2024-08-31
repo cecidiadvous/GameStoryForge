@@ -1,4 +1,5 @@
 <template>
+
   <div class="register-container">
     <h2>Register</h2>
     <form @submit.prevent="register">
@@ -19,6 +20,10 @@
     <div v-if="message" :class="{'error-message': isError, 'success-message': !isError}">
       {{ message }}
     </div>
+<!--    <div class="register-link">-->
+<!--      &lt;!&ndash; 注册链接 &ndash;&gt;-->
+<!--      Don't have an account? <router-link to="/register">Register here</router-link>-->
+<!--    </div>-->
   </div>
 </template>
 
@@ -48,7 +53,7 @@ export default {
         this.isError = false;
 
         // 注册成功后跳转到登录页面
-        this.$router.push('/login');
+        this.$router.push('/auth');
       } catch (err) {
         this.message = 'Registration failed: ' + (err.response && err.response.data.message ? err.response.data.message : err.message);
         this.isError = true;
@@ -60,12 +65,15 @@ export default {
 
 <style scoped>
 .register-container {
-  max-width: 400px;
+  max-width: 500px; /* 最大宽度为400px */
+  aspect-ratio: 3.5 / 4;
   margin: 0 auto;
   padding: 1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9); /* 使登录表单有轻微的背景 */
+  color: #333;
 }
 
 .form-group {
@@ -78,15 +86,18 @@ export default {
 }
 
 .form-group input {
+
   width: 100%;
   padding: 0.5rem;
   box-sizing: border-box;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 
 button {
   width: 100%;
   padding: 0.75rem;
-  background-color: #28a745;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;

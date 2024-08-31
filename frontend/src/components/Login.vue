@@ -61,7 +61,8 @@ export default {
 
 <style scoped>
 .login-container {
-  max-width: 400px;
+  max-width: 500px;
+  aspect-ratio: 3.5 / 4;
   margin: 0 auto;
   padding: 1rem;
   border: 1px solid #ccc;
@@ -71,12 +72,6 @@ export default {
   color: #333;
 }
 
-body, html {
-  background-image: url('@/assets/background.png'); /* 仅在登录页面显示背景图 */
-  background-size: cover;
-  background-position: center;
-  height: 100vh;
-}
 
 .form-group {
   margin-bottom: 1rem;

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h1>My Vue App</h1>
+
     <router-view></router-view> <!-- 动态渲染路由对应的组件 -->
   </div>
 </template>
@@ -18,6 +18,13 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 0px;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
 }
 </style>
