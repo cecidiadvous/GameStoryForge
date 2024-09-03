@@ -190,7 +190,7 @@ button:hover {
 
 .toggle-link {
   margin-bottom: 10%;
-  font-size: 19px;
+  font-size: 17px;
   line-height: 1;
   padding-bottom: 10px;
 }

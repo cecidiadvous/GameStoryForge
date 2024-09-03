@@ -40,18 +40,16 @@ export default {
   name: 'Home',
   methods: {
     logout() {
-      // 清除本地存储的用户信息
       localStorage.removeItem('user');
-      // 重定向到登录页面
       this.$router.push('/auth');
     },
     startBuilding() {
-      // 可以在此添加跳转或其他逻辑
-      console.log("Start building clicked");
+      this.$router.push('/dashboard'); // 导航到Dashboard页面
     }
   }
 };
 </script>
+
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap');
@@ -101,7 +99,7 @@ export default {
   color: #E1E1E1;
   cursor: pointer;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: normal;
   font-family: Lora, serif;
 }
 
@@ -170,7 +168,7 @@ export default {
   width: 900px;
   justify-content: space-between;
   align-items: center;
-  background-color: #1c1c1c;
+  background-color: #171717;
   padding: 0px;
   margin-top: 4%;
   border-radius: 12px;

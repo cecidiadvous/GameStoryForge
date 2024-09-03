@@ -3,12 +3,18 @@ import Login from '../components/Login.vue';
 import Register from '../components/Register.vue';
 import Home from '../components/Home.vue';
 import AuthPage from "@/components/AuthPage.vue";
+import Dashboard from "@/components/Dashboard.vue";
 
 const routes = [
     { path: '/auth', component: AuthPage },
     {
         path: '/home',
         component: Home,
+        meta: { requiresAuth: true }, // 需要身份验证
+    },
+    {
+        path: '/dashboard',
+        component: Dashboard, // 新增Dashboard路径
         meta: { requiresAuth: true }, // 需要身份验证
     },
     { path: '/', redirect: '/auth' },
