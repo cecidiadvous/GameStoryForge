@@ -14,14 +14,17 @@
     <h1 class="dashboard-title">Dashboard</h1>
 
     <div class="games-list">
-      <div class="game-card" v-for="(game, index) in games" :key="game.name">
+      <div class="game-card" v-for="(game, index) in games" :key="game.gameId">
         <img :src="game.image || defaultImage" alt="Game image">
 
         <div class="game-info">
           <h3>{{ game.name }}</h3>
           <button class="edit-button" @click="editGame(index)">
             <img src="@/assets/edit_button.svg" alt="Edit" class="edit-icon">
-
+          </button>
+          <!-- 删除按钮 -->
+          <button class="delete-button" @click="deleteGame(index)">
+            <img src="@/assets/delete_icon.svg" alt="Delete" class="delete-icon">
           </button>
         </div>
       </div>
@@ -48,7 +51,10 @@
 
 
 <script>
+
+import axios from 'axios';
 import backgroundImage from '@/assets/background.png';
+
 export default {
   name: 'Dashboard',
   data() {
@@ -58,37 +64,68 @@ export default {
       defaultImage: backgroundImage,
       newGame: {
         name: '',
+        gameId: '',
         description: '',
         image: '', // 将图像路径初始为空
       },
-      games: [
-        {
-          name: 'Elden Ring',
-          description: 'An epic dark fantasy game',
-          image: backgroundImage
-        }
-      ]
+      games: [], // 通过后端获取的游戏数据初始化为空数组
     };
   },
+  async mounted() {
+    await this.fetchGames(); // 页面加载时从后端获取游戏数据
+  },
   methods: {
-    logout() {
-      localStorage.removeItem('user');
-      this.$router.push('/auth');
-    },
-    handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (file) {
-        this.newGame.image = URL.createObjectURL(file);
+    // 获取游戏列表
+    async fetchGames() {
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        try {
+          const response = await axios.get(`/api/dashboard/games?username=${user.username}`);
+          this.games = response.data.map(game => {
+            // 如果游戏有图片，确保完整的图片URL
+            game.image = game.image ? `http://localhost:8080${game.image}` : this.defaultImage;
+            return game;
+          });
+          console.log('myGames:', this.games);
+        } catch (error) {
+          console.error('Error fetching games:', error);
+        }
+      } else {
+        this.$router.push('/auth'); // 如果用户未登录，跳转到登录页面
       }
     },
-    addGame() {
-      if (!this.newGame.image) {
-        this.newGame.image = this.defaultImage;
-      }
-      if (this.newGame.name && this.newGame.description && this.newGame.image) {
-        this.games.push({ ...this.newGame });
-        this.showForm = false;
-        this.resetForm();
+
+    // 添加游戏
+    async addGame() {
+      const user = JSON.parse(localStorage.getItem('user')); // 获取当前用户
+      const formData = new FormData(); // 创建 FormData 对象，用于包含文件和其他字段
+
+      // 将图片文件和其他字段添加到 FormData 中
+      formData.append('name', this.newGame.name);
+      formData.append('description', this.newGame.description);
+      formData.append('image', this.newGame.image); // 假设 this.newGame.image 是文件对象
+      formData.append('username', user.username);
+
+      if (this.newGame.name && this.newGame.description) {
+        try {
+          // 发送 POST 请求到后端，包括 FormData 数据
+          const response = await axios.post('/api/dashboard/games', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data' // 指定为文件表单类型
+            }
+          });
+
+          // 为新游戏设置图片URL
+          response.data.image = response.data.image
+              ? `http://localhost:8080${response.data.image}`
+              : this.defaultImage;
+
+          this.games.push(response.data); // 添加游戏到前端列表
+          this.showForm = false;
+          this.resetForm();
+        } catch (error) {
+          console.error('Error adding game:', error);
+        }
       }
     },
     editGame(index) {
@@ -96,15 +133,45 @@ export default {
       this.newGame = { ...this.games[index] }; // 将选中的游戏数据复制到表单中
       this.showForm = true;
     },
-    updateGame() {
+    async updateGame() {
+      const user = JSON.parse(localStorage.getItem('user')); // 从 localStorage 中获取当前用户
       if (this.editingIndex !== -1) {
-        // 如果用户没有上传图片，使用默认封面图片
-        if (!this.newGame.image) {
-          this.newGame.image = this.defaultImage;
+        try {
+          const formData = new FormData();
+          formData.append('name', this.newGame.name);
+          formData.append('description', this.newGame.description);
+          if (this.newGame.image) {
+            formData.append('image', this.newGame.image);
+          }
+          formData.append('username', user.username);
+
+          const response = await axios.put(`/api/dashboard/games/${this.games[this.editingIndex].gameId}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+
+          this.games[this.editingIndex] = response.data;
+
+          this.games[this.editingIndex].image = response.data.image
+              ? `http://localhost:8080${response.data.image}?t=${new Date().getTime()}`
+              : this.defaultImage;
+
+          this.showForm = false;
+          this.resetForm();
+        } catch (error) {
+          console.error('Error updating game:', error);
         }
-        this.games[this.editingIndex] = { ...this.newGame };
-        this.showForm = false;
-        this.resetForm();
+      }
+    },
+
+    async deleteGame(index) {
+      try {
+        const gameId = this.games[index].gameId;
+        await axios.delete(`/api/dashboard/games/${gameId}`);
+        this.games.splice(index, 1); // 从前端移除已删除的游戏
+      } catch (error) {
+        console.error('Error deleting game:', error);
       }
     },
     cancelEdit() {
@@ -118,8 +185,18 @@ export default {
         image: '',
       };
       this.editingIndex = -1;
-    }
-  }
+    },
+    logout() {
+      localStorage.removeItem('user');
+      this.$router.push('/auth');
+    },
+    handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.newGame.image = file;
+      }
+    },
+  },
 };
 
 </script>
@@ -216,6 +293,10 @@ export default {
 
 }
 
+.game-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* 鼠标悬停时加重阴影 */
+}
+
 .game-card img {
   width: 100%;
   height: 80%; /* 确保图片充满容器 */
@@ -236,23 +317,42 @@ export default {
   font-weight: normal;
   font-family: Lora, serif;
   margin-top: -1px;
+  display: inline-block;
 }
 
 .edit-button {
   position: absolute;
-  max-width: 20%;
-  bottom: 17px;
-  left: 1px;
-  padding: 5px 10px;
+  width: 38px;
+  bottom: 15px;
+  right: 205px; /* 确保编辑按钮在删除按钮的左边 */
+  padding: 5px;
   background-color: rgba(63, 125, 101, 0);
-  color: #ffffff;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
 }
 
 .edit-button:hover {
   transform: scale(1.1); /* 鼠标悬停时放大 */
+}
+
+.delete-button {
+  position: absolute;
+  width: 38px;
+  bottom: 15px;
+  right: 5px; /* 设置删除按钮的位置 */
+  padding: 5px;
+  background-color: rgba(63, 125, 101, 0);
+  border: none;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  transform: scale(1.1); /* 鼠标悬停时放大 */
+}
+
+.edit-icon, .delete-icon {
+  width: 100%;
+  height: auto;
 }
 
 
@@ -272,6 +372,10 @@ export default {
 .add-card span {
   font-size: 68px; /* 调整“+”号的大小 */
   color: #D2D2D2;
+}
+
+.add-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .popup-form {
