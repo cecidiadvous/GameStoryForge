@@ -45,30 +45,33 @@
           <p>5. Generate Story Dialogue.</p>
           <p>6. Download: download the final content.</p>
         </section>
-  
-        <section class="character-select">
-          <h3>Character Select</h3>
-          <div class="character-box" v-for="character in availableCharacters" :key="character.characterId" @click="selectCharacter(character)">
-            <p>{{ character.name }}</p>
-          </div>
-        </section>
-  
-        <section class="character-list">
-          <h3>Character List</h3>
-          <div v-if="selectedCharacters.length === 0" class="no-characters">
-            There is no character selected.
-          </div>
-          <div v-else v-for="character in selectedCharacters" :key="character.characterId" class="character-card">
-            <p><strong>Name:</strong> {{ character.name }}</p>
-            <p><strong>Role:</strong> {{ character.role }}</p>
-            <p><strong>Ability:</strong> {{ character.ability }}</p>
-            <div class="character-actions">
-              <button @click="openEditModal(character)">✏️ Edit</button>
-              <button @click="removeCharacter(character.characterId)">🗑️ Delete</button>
+        <div class="character-sections">
+          <section class="character-select">
+            <h3>Selected Characters</h3>
+            <div v-if="selectedCharacters.length === 0" class="no-characters">
+              There is no character selected.
             </div>
-          </div>
-        </section>
-  
+            <div class="character-box" v-else v-for="character in selectedCharacters" :key="character.characterId" @click="unselectCharacter(character.characterId)">
+              <p>{{ character.name }}</p>
+            </div>
+          </section>
+    
+          <section class="character-list">
+            <h3>Character List</h3>
+            <div v-if="availableCharacters.length === 0" class="no-characters">
+              There is no character.
+            </div>
+            <div v-else v-for="character in availableCharacters" :key="character.characterId" class="character-card" @click="selectCharacter(character)">
+              <p><strong>Name:</strong> {{ character.name }}</p>
+              <p><strong>Role:</strong> {{ character.role }}</p>
+              <p><strong>Ability:</strong> {{ character.ability }}</p>
+              <div class="character-actions">
+                <button @click.stop="openEditModal(character)">✏️</button>
+                <button @click.stop="removeCharacter(character.characterId)">🗑️</button>
+              </div>
+            </div>
+          </section>
+        </div>
         <section class="story-box">
           <h3>Describe the style and story of the game</h3>
           <textarea v-model="storyDescription" placeholder="Describe the style and story of the game"></textarea>
@@ -164,12 +167,11 @@
       },
       selectChapter(chapter) {
         this.selectedChapter = chapter;
-        this.fetchCharactersForChapter(chapter.chapterId);
       },
-      async fetchCharactersForChapter(chapterId) {
+      async fetchCharactersForGame() { //params - gameID????????????????
         try {
-          const response = await axios.get(`/api/chapters/${chapterId}/characters`);
-          this.selectedCharacters = response.data;
+          const response = await axios.get(`/api/characters`);
+          this.availableCharacters = response.data
         } catch (error) {
           console.error('Error fetching characters:', error);
         }
@@ -178,6 +180,10 @@
         if (!this.selectedCharacters.find(c => c.characterId === character.characterId)) {
           this.selectedCharacters.push(character);
         }
+      },
+      async unselectCharacter(id) {
+        this.selectedCharacters = this.selectedCharacters.filter(character => character.characterId !== id);
+
       },
       openEditModal(character) {
         this.editableCharacter = { ...character };
@@ -188,11 +194,11 @@
         this.editableCharacter = null;
       },
       async updateCharacter() {
-        const index = this.selectedCharacters.findIndex(c => c.characterId === this.editableCharacter.characterId);
+        const index = this.availableCharacters.findIndex(c => c.characterId === this.editableCharacter.characterId);
         if (index !== -1) {
           try {
             const response = await axios.put(`/api/characters/${this.editableCharacter.characterId}`, this.editableCharacter);
-            this.selectedCharacters[index] = response.data;
+            this.availableCharacters[index] = response.data;
             this.closeEditModal();
           } catch (error) {
             console.error('Error updating character:', error);
@@ -202,6 +208,7 @@
       async removeCharacter(id) {
         try {
           await axios.delete(`/api/characters/${id}`);
+          this.availableCharacters = this.availableCharacters.filter(character => character.characterId !== id);
           this.selectedCharacters = this.selectedCharacters.filter(character => character.characterId !== id);
         } catch (error) {
           console.error('Error deleting character:', error);
@@ -213,6 +220,7 @@
     },
     async mounted() {
       await this.fetchChapters();
+      await this.fetchCharactersForGame();
 
     }
   };
@@ -222,7 +230,7 @@
   <style scoped>
   .workshop-container {
     display: flex;
-    height: 100vh;
+    height: 200vh;
     background-color: #333;
     color: #fff;
   }
@@ -315,7 +323,7 @@
     flex-grow: 1;
     padding: 20px;
     padding-top: 70px;
-    background: url('@/assets/workshop_initial_background.png') no-repeat center center;
+    background: url('@/assets/elden-ring-background.jpg') no-repeat center center;
     background-size: cover;
     position: relative;
   }
@@ -349,8 +357,24 @@
   .story-box {
     margin-bottom: 20px;
   }
+
+  .character-sections {
+    display: flex;
+    gap: 20px; /* Space between the two sections */
+  }
+
+  .character-select,
+  .character-list {
+    flex: 1; /* Make each section take up equal space */
+    background-color: #2b2a2a;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    overflow-y: auto; /* Allow scrolling if content overflows */
+  }
   
   .character-select .character-box {
+    width: calc(50% - 10px);
     background-color: #555;
     border-radius: 5px;
     padding: 10px;
