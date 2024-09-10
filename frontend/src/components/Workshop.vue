@@ -1,42 +1,89 @@
 <template>
-    <div class="workshop-container">
-      <!-- Top Navigation Bar -->
-      <nav class="top-nav">
-        <div class="nav-left">
-          <span class="logo">GameStoryForge</span>
-        </div>
-        <div class="nav-right">
-          <ul class="nav-list">
-            <li><button @click="handleDownload">Download</button></li>
-            <li><router-link to="/home">Home</router-link></li>
-            <li><router-link to="/dashboard">Dashboard</router-link></li>
-            <li><button @click="logout">Sign Out</button></li>
-          </ul>
-        </div>
-      </nav>
-      <aside class="sidebar">
-        <h3>{{ projectTitle }}</h3>
-        <ul>
-          <li v-for="chapter in chapters" :key="chapter.chapterId" @click="selectChapter(chapter)">
-            {{ chapter.name }}
-          </li>
+  <div class="workshop-container">
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <div class="nav-left">
+        <h2>
+          <span class="gamestory">GameStory</span>
+          <span class="forge">Forge</span>
+        </h2>
+      </div>
+      <div class="nav-right">
+        <ul class="nav-list">
+          <li><button @click="handleDownload">Download</button></li>
+          <li><router-link to="/home">Home</router-link></li>
+          <li><router-link to="/dashboard">Dashboard</router-link></li>
+          <li><button @click="logout">Log Out</button></li>
         </ul>
-        <input v-model="newChapterName" placeholder="Add chapter name" />
-        <button @click="addChapter">Add Chapter</button>
-      </aside>
-  
-      <main class="main-content">
-        <div class="top-bar">
-          <header class="chapter-header">
-            <h2>{{ selectedChapter.name }}</h2>
-            <span>{{ selectedChapter.subtitle }}</span>
-          </header>
-          <button @click="toggleInstructions" class="instructions-button">
-            {{ showInstructions ? 'Hide Instructions' : 'Show Instructions' }}
-          </button>
-        </div>
-  
-        <section v-if="showInstructions" class="instructions">
+      </div>
+    </nav>
+
+    <aside class="sidebar">
+      <h3>{{ projectTitle }}</h3>
+      <ul>
+        <li v-for="chapter in chapters" :key="chapter.chapterId" @click="selectChapter(chapter)">
+          {{ chapter.name }}
+        </li>
+      </ul>
+      <input v-model="newChapterName" placeholder="Add chapter name" />
+      <button @click="addChapter">Add Chapter</button>
+    </aside>
+
+    <!-- Scrollable container for main content -->
+    <div class="main-content-container">
+      <div class="scrollable-container">
+        <main class="main-content">
+          <div class="top-bar">
+            <header class="chapter-header">
+              <h2>{{ selectedChapter.name }}</h2>
+              <span>{{ selectedChapter.subtitle }}</span>
+            </header>
+            <button @click="toggleInstructions" class="instructions-button">
+              {{ showInstructions ? 'Hide Instructions' : 'Show Instructions' }}
+            </button>
+          </div>
+
+          <div class="character-sections">
+            <section class="character-select">
+              <h3>Selected Characters</h3>
+              <div v-if="selectedCharacters.length === 0" class="no-characters">
+                There is no character selected.
+              </div>
+              <div class="character-box" v-else v-for="character in selectedCharacters" :key="character.characterId" @click="unselectCharacter(character.characterId)">
+                <p>{{ character.name }}</p>
+              </div>
+            </section>
+
+            <section class="character-list">
+              <h3>Character List</h3>
+              <div v-if="availableCharacters.length === 0" class="no-characters">
+                There is no character.
+              </div>
+              <div v-else v-for="character in availableCharacters" :key="character.characterId" class="character-card" @click="selectCharacter(character)">
+                <p><strong>Name:</strong> {{ character.name }}</p>
+                <p><strong>Role:</strong> {{ character.role }}</p>
+                <p><strong>Ability:</strong> {{ character.ability }}</p>
+                <div class="character-actions">
+                  <button @click.stop="openEditModal(character)">✏️</button>
+                  <button @click.stop="removeCharacter(character.characterId)">🗑️</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <section class="story-box">
+            <h3>Describe the style and story of the game</h3>
+            <textarea v-model="storyDescription" placeholder="Describe the style and story of the game"></textarea>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal for Editing Character -->
+    <div v-if="showInstructions" class="modal-overlay">
+      <div class="modal-content">
+        <button @click="toggleInstructions" class="close-modal">Close</button>
+        <section class="instructions">
           <h3>Instruction</h3>
           <p>1. Select a Chapter: Use the left sidebar to choose or add a chapter.</p>
           <p>2. Select Characters: Drag characters from "Character Select" to the "Character List" to include them in the story.</p>
@@ -45,73 +92,43 @@
           <p>5. Generate Story Dialogue.</p>
           <p>6. Download: download the final content.</p>
         </section>
-        <div class="character-sections">
-          <section class="character-select">
-            <h3>Selected Characters</h3>
-            <div v-if="selectedCharacters.length === 0" class="no-characters">
-              There is no character selected.
-            </div>
-            <div class="character-box" v-else v-for="character in selectedCharacters" :key="character.characterId" @click="unselectCharacter(character.characterId)">
-              <p>{{ character.name }}</p>
-            </div>
-          </section>
-    
-          <section class="character-list">
-            <h3>Character List</h3>
-            <div v-if="availableCharacters.length === 0" class="no-characters">
-              There is no character.
-            </div>
-            <div v-else v-for="character in availableCharacters" :key="character.characterId" class="character-card" @click="selectCharacter(character)">
-              <p><strong>Name:</strong> {{ character.name }}</p>
-              <p><strong>Role:</strong> {{ character.role }}</p>
-              <p><strong>Ability:</strong> {{ character.ability }}</p>
-              <div class="character-actions">
-                <button @click.stop="openEditModal(character)">✏️</button>
-                <button @click.stop="removeCharacter(character.characterId)">🗑️</button>
-              </div>
-            </div>
-          </section>
-        </div>
-        <section class="story-box">
-          <h3>Describe the style and story of the game</h3>
-          <textarea v-model="storyDescription" placeholder="Describe the style and story of the game"></textarea>
-        </section>
-  
-        <!-- Modal for Editing Character -->
-        <Modal :visible="isEditModalVisible" @close="closeEditModal">
-          <template #header>
-            <h2>Edit Character</h2>
-          </template>
-          <template #body>
-            <form @submit.prevent="updateCharacter">
-              <div>
-                <label for="character-name">Name:</label>
-                <input id="character-name" v-model="editableCharacter.name" required />
-              </div>
-              <div>
-                <label for="character-role">Role:</label>
-                <input id="character-role" v-model="editableCharacter.role" required />
-              </div>
-              <div>
-                <label for="character-ability">Ability:</label>
-                <input id="character-ability" v-model="editableCharacter.ability" required />
-              </div>
-              <div>
-                <label for="character-background">Background:</label>
-                <textarea id="character-background" v-model="editableCharacter.background"></textarea>
-              </div>
-              <button type="submit">Save</button>
-            </form>
-          </template>
-          <template #footer>
-            <button @click="closeEditModal">Close</button>
-          </template>
-        </Modal>
-      </main>
+      </div>
     </div>
-  </template>
-  
-  <script>
+
+    <Modal :visible="isEditModalVisible" @close="closeEditModal">
+      <template #header>
+        <h2>Edit Character</h2>
+      </template>
+      <template #body>
+        <form @submit.prevent="updateCharacter">
+          <div>
+            <label for="character-name">Name:</label>
+            <input id="character-name" v-model="editableCharacter.name" required />
+          </div>
+          <div>
+            <label for="character-role">Role:</label>
+            <input id="character-role" v-model="editableCharacter.role" required />
+          </div>
+          <div>
+            <label for="character-ability">Ability:</label>
+            <input id="character-ability" v-model="editableCharacter.ability" required />
+          </div>
+          <div>
+            <label for="character-background">Background:</label>
+            <textarea id="character-background" v-model="editableCharacter.background"></textarea>
+          </div>
+          <button type="submit">Save</button>
+        </form>
+      </template>
+      <template #footer>
+        <button @click="closeEditModal">Close</button>
+      </template>
+    </Modal>
+  </div>
+</template>
+
+
+<script>
   import Modal from './Modal.vue';
   import axios from 'axios';
   
@@ -236,18 +253,19 @@
   }
 
   .top-nav {
-  background-color: #000;
-  padding: 10px 20px;
-  position: fixed; /* Fix the nav bar at the top */
-  width: 100%; /* Make it span the full width */
-  top: 0;
-  left: 0;
-  z-index: 1000; /* Keep it above other content */
-  display: flex;
-  justify-content: space-between; /* Space between logo and nav items */
-  align-items: center;
-  box-sizing: border-box;
-}
+    background-color: #000;
+    padding: 10px 20px;
+    position: fixed; /* Fix the nav bar at the top */
+    width: 100%; /* Make it span the full width */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Keep it above other content */
+    display: flex;
+    justify-content: space-between; /* Space between logo and nav items */
+    align-items: center;
+    box-sizing: border-box;
+    height: 40px; /* Ensure a fixed height for the nav bar */
+  }
 
 .nav-left .logo {
   font-size: 20px;
@@ -256,39 +274,63 @@
   text-transform: uppercase;
 }
 
-.nav-right .nav-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-}
+  .gamestory {
+    color: #A0A0A0;
+    font-weight: normal;
+    font-size: 26px;
+    font-family: Lobster, cursive;
+  }
 
-.nav-right .nav-list li {
-  margin-left: 20px;
-}
+  .forge {
+    color: #727272;
+    font-weight: normal;
+    font-size: 26px;
+    font-family: Lobster, cursive;
+  }
 
-.nav-right .nav-list li a,
-.nav-right .nav-list li button {
-  color: white;
-  background: none;
-  border: none;
-  cursor: pointer;
-  text-decoration: none;
-  font-size: 16px;
-}
+  .nav-right .nav-list {
+    list-style: none;
+    display: flex; /* 改成 flex 布局 */
+    align-items: center; /* 垂直对齐到中心 */
+    color: #E1E1E1;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: normal;
+    font-family: Lora, serif;
+  }
 
-.nav-right .nav-list li button:hover,
-.nav-right .nav-list li a:hover {
-  text-decoration: underline;
-}
+  .nav-right .nav-list li {
+    margin-left: 10px;
+  }
 
-.nav-right .nav-list li button:focus {
-  outline: none;
-}
+  .nav-right .nav-list li a,
+  .nav-right .nav-list li button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 16px;
+    color: #E1E1E1;
+    font-weight: normal;
+    font-family: Lora, serif;
+    display: flex; /* 确保按钮内的文本居中对齐 */
+    align-items: center; /* 垂直居中对齐 */
+    padding: 5px 10px; /* 添加一些内边距确保点击区域足够 */
+  }
+
+  .nav-right .nav-list li button:hover,
+  .nav-right .nav-list li a:hover {
+    text-decoration: underline;
+  }
+
+  .nav-right .nav-list li button:focus {
+    outline: none;
+  }
+
   
   .sidebar {
     width: 200px;
-    background-color: #444;
+    background-color: #000000;
     padding: 20px;
     padding-top: 70px;
     display: flex;
@@ -318,22 +360,55 @@
     border: none;
     border-radius: 5px;
   }
-  
-  .main-content {
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* 阻止整个页面的滚动条 */
+
+  }
+
+  .main-content-container {
+    flex-grow: 1;
+    margin-top: 40px; /* Add a top margin equal to the nav bar's height */
+    display: flex;
+    flex-direction: column;
+    background-color: #000000;
+  }
+
+  .workshop-container {
+    display: flex;
+    height: 100vh; /* 让容器充满视口高度 */
+    background-color: #333;
+    color: #fff;
+  }
+
+  .scrollable-container {
     flex-grow: 1;
     padding: 20px;
-    padding-top: 70px;
-    background: url('@/assets/elden-ring-background.jpg') no-repeat center center;
+    padding-left: 0;
+    padding-right: 15px;
+    padding-top: 0;
+    overflow-y: auto; /* 使内容可滚动 */
+    background-color: #f4f4f4;
+    border-radius: 12px;
+    margin: 0 8px 8px 0;
+    background: url('@/assets/background.png') no-repeat center center;
     background-size: cover;
-    position: relative;
   }
-  
+
+  .main-content {
+    flex-grow: 1;
+
+  }
+
   .top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  
+
   .instructions-button {
     padding: 10px 20px;
     background-color: #1f67b4;
@@ -356,30 +431,24 @@
   .character-list,
   .story-box {
     margin-bottom: 20px;
+
   }
 
   .character-sections {
     display: flex;
     gap: 20px; /* Space between the two sections */
+    width: 870px;
+    margin: 0 auto;
   }
 
-  .character-select,
-  .character-list {
-    flex: 1; /* Make each section take up equal space */
-    background-color: #2b2a2a;
-    margin-top: 20px;
+
+
+  .character-select, .character-list {
+    flex: 1; /* 让两个区域自动填满剩余空间 */
+    background-color: rgba(62, 64, 74, 0.9);
     padding: 20px;
     border-radius: 8px;
-    overflow-y: auto; /* Allow scrolling if content overflows */
-  }
-  
-  .character-select .character-box {
-    width: calc(50% - 10px);
-    background-color: #555;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
+    overflow-y: auto; /* 单独设置滚动条 */
   }
   
   .character-box:hover {
@@ -387,8 +456,8 @@
   }
   
   .character-list .character-card {
-    background-color: #555;
-    border-radius: 5px;
+    background-color: #25272f;
+    border-radius: 7px;
     padding: 10px;
     margin-bottom: 10px;
   }
@@ -405,9 +474,9 @@
   }
   
   .story-box textarea {
-    width: 100%;
-    height: 100px;
-    background-color: #444;
+    width: 850px;
+    height: 300px;
+    background-color: rgba(62, 64, 74, 0.9);
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -418,5 +487,50 @@
   .story-box textarea::placeholder {
     color: #bbb;
   }
+
+  .scrollable-container {
+    scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
+    scrollbar-width: thin; /* 可以为 auto, thin 或 none */
+  }
+
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* 半透明背景 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001; /* 保证在最顶层 */
+  }
+
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%; /* 可根据需要调整宽度 */
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .instructions {
+    color: #333;
+  }
+
+
   </style>
   
