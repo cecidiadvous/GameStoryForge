@@ -15,7 +15,7 @@
 
     <div class="games-list">
       <div class="game-card" v-for="(game, index) in games" :key="game.gameId">
-        <img :src="game.image || defaultImage" alt="Game image">
+        <img :src="game.image || defaultImage" alt="Game image" @click="goToWarkshop(game.gameId)" />
 
         <div class="game-info">
           <h3>{{ game.name }}</h3>
@@ -75,6 +75,9 @@ export default {
     await this.fetchGames(); // 页面加载时从后端获取游戏数据
   },
   methods: {
+    goToWarkshop(gameId) {
+      this.$router.push(`/workshop/${gameId}`);
+    },
     // 获取游戏列表
     async fetchGames() {
       const user = JSON.parse(localStorage.getItem('user'));

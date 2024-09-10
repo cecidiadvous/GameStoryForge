@@ -9,31 +9,32 @@ public class Character {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "character_id")
-    private Long characterId;
+    private Integer characterId;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(name = "role")
+    @Column(nullable = false)
     private String role;
 
-    @Column(name = "background")
+    @Column(nullable = false)
     private String background;
 
-    @Column(name = "ability")
+    @Column(nullable = false)
     private String ability;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id", nullable = false)
-    private Game game;
+    @Column(name = "game_id", nullable = false)
+    private Integer gameId;
+
+    public Character() {
+    }
 
     // Getters and Setters
-
-    public Long getCharacterId() {
+    public Integer getCharacterId() {
         return characterId;
     }
 
-    public void setCharacterId(Long characterId) {
+    public void setCharacterId(Integer characterId) {
         this.characterId = characterId;
     }
 
@@ -69,12 +70,11 @@ public class Character {
         this.ability = ability;
     }
 
-    public Game getGame() {
-        return game;
+    public Integer getGameId() {
+        return gameId;
     }
 
-    public void setGame(Game game) {
-        this.game = game;
+    public void setGameId(Integer gameId) {
+        this.gameId = gameId;
     }
 }
-

@@ -27,11 +27,7 @@ public class Game {
     @JsonBackReference
     private UserData user;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Chapter> chapters;
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Character> characters;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -73,21 +69,7 @@ public class Game {
         this.user = user;
     }
 
-    public List<Chapter> getChapters() {
-        return chapters;
-    }
 
-    public void setChapters(List<Chapter> chapters) {
-        this.chapters = chapters;
-    }
-
-    public List<Character> getCharacters() {
-        return characters;
-    }
-
-    public void setCharacters(List<Character> characters) {
-        this.characters = characters;
-    }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
@@ -119,8 +101,6 @@ public class Game {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", user=" + user +
-                ", chapters=" + chapters +
-                ", characters=" + characters +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';

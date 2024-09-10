@@ -4,6 +4,7 @@ import Register from '../components/Register.vue';
 import Home from '../components/Home.vue';
 import AuthPage from "@/components/AuthPage.vue";
 import Dashboard from "@/components/Dashboard.vue";
+import Workshop from "@/components/Workshop.vue";
 
 const routes = [
     { path: '/auth', component: AuthPage },
@@ -16,6 +17,12 @@ const routes = [
         path: '/dashboard',
         component: Dashboard, // 新增Dashboard路径
         meta: { requiresAuth: true }, // 需要身份验证
+    },
+
+    {
+        path: '/workshop/:id', // 动态路由，:id 表示游戏 ID
+        meta: { requiresAuth: true },
+        component: Workshop,
     },
     { path: '/', redirect: '/auth' },
 ];

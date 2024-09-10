@@ -10,13 +10,15 @@ public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chapter_id")
-    private Long chapterId;
+    private Integer chapterId;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(name = "description")
     private String description;
+
+    @Column(name = "game_id", nullable = false)
+    private Integer gameId;
 
     @Column(name = "user_text")
     private String userText;
@@ -24,23 +26,23 @@ public class Chapter {
     @Column(name = "system_text")
     private String systemText;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id", nullable = false)
-    private Game game;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Getters and Setters
+    public Chapter() {
+        // Initialize createdAt with the current time
+        this.createdAt = LocalDateTime.now();
+    }
 
-    public Long getChapterId() {
+    // Getters and Setters
+    public Integer getChapterId() {
         return chapterId;
     }
 
-    public void setChapterId(Long chapterId) {
+    public void setChapterId(Integer chapterId) {
         this.chapterId = chapterId;
     }
 
@@ -60,6 +62,14 @@ public class Chapter {
         this.description = description;
     }
 
+    public Integer getGameId() {
+        return gameId;
+    }
+
+    public void setGameId(Integer gameId) {
+        this.gameId = gameId;
+    }
+
     public String getUserText() {
         return userText;
     }
@@ -74,14 +84,6 @@ public class Chapter {
 
     public void setSystemText(String systemText) {
         this.systemText = systemText;
-    }
-
-    public Game getGame() {
-        return game;
-    }
-
-    public void setGame(Game game) {
-        this.game = game;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -100,4 +102,3 @@ public class Chapter {
         this.updatedAt = updatedAt;
     }
 }
-
