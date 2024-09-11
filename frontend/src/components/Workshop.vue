@@ -2,12 +2,12 @@
   <div class="workshop-container">
     <!-- Top Navigation Bar -->
     <nav class="top-nav">
-      <div class="nav-left">
+
         <h2>
           <span class="gamestory">GameStory</span>
           <span class="forge">Forge</span>
         </h2>
-      </div>
+
       <div class="nav-right">
         <ul class="nav-list">
           <li><button @click="handleDownload">Download</button></li>
@@ -19,14 +19,20 @@
     </nav>
 
     <aside class="sidebar">
-      <h3>{{ projectTitle }}</h3>
-      <ul>
-        <li v-for="chapter in chapters" :key="chapter.chapterId" @click="selectChapter(chapter)">
-          {{ chapter.name }}
-        </li>
-      </ul>
-      <input v-model="newChapterName" placeholder="Add chapter name" />
-      <button @click="addChapter">Add Chapter</button>
+      <div class="input-button-wrapper">
+        <div class="input-button-container">
+          <input v-model="newChapterName" placeholder="Add chapter name" @keyup.enter="addChapter" />
+          <img src="@/assets/chapter_add.svg" @click="addChapter" class="add-button" />
+        </div>
+      </div>
+      <div class="chapter-list-container">
+        <h3>{{ projectTitle }}</h3>
+        <ul>
+          <li v-for="chapter in chapters" :key="chapter.chapterId" @click="selectChapter(chapter)" :class="{ selected: chapter.chapterId === selectedChapter.chapterId }">
+            {{ chapter.name }}
+          </li>
+        </ul>
+      </div>
     </aside>
 
     <!-- Scrollable container for main content -->
@@ -35,7 +41,7 @@
         <main class="main-content">
           <div class="top-bar">
             <header class="chapter-header">
-              <h2>{{ selectedChapter.name }}</h2>
+
               <span>{{ selectedChapter.subtitle }}</span>
             </header>
             <button @click="toggleInstructions" class="instructions-button">
@@ -267,12 +273,7 @@
     height: 40px; /* Ensure a fixed height for the nav bar */
   }
 
-.nav-left .logo {
-  font-size: 20px;
-  font-weight: bold;
-  color: white;
-  text-transform: uppercase;
-}
+
 
   .gamestory {
     color: #A0A0A0;
@@ -300,7 +301,7 @@
   }
 
   .nav-right .nav-list li {
-    margin-left: 10px;
+    margin-left: 15px;
   }
 
   .nav-right .nav-list li a,
@@ -315,7 +316,7 @@
     font-family: Lora, serif;
     display: flex; /* 确保按钮内的文本居中对齐 */
     align-items: center; /* 垂直居中对齐 */
-    padding: 5px 10px; /* 添加一些内边距确保点击区域足够 */
+    padding: 0px 0px 0 5px; /* 添加一些内边距确保点击区域足够 */
   }
 
   .nav-right .nav-list li button:hover,
@@ -327,31 +328,46 @@
     outline: none;
   }
 
-  
+
   .sidebar {
     width: 200px;
     background-color: #000000;
     padding: 20px;
-    padding-top: 70px;
+    padding-top: 45px;
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .sidebar h3 {
     margin-bottom: 10px;
+    margin-top: 10px;
+    font-weight: normal;
+    font-size: 20px;
   }
-  
+
   .sidebar ul {
     list-style: none;
     padding: 0;
+    margin: 5px 5px;
   }
-  
+
   .sidebar ul li {
-    margin: 10px 0;
+    margin: 3px 0;
     cursor: pointer;
+    font-size: 18px;
+    padding: 6px 13px;
   }
-  
+  .sidebar ul li:hover {
+    background-color: #36373f; /* Change background color on hover */
+    border-radius: 8px;
+  }
+
+  .sidebar ul li.selected {
+    background-color: #36373f; /* Highlight color */
+    border-radius: 8px;
+  }
+
   .sidebar input {
     margin-top: 10px;
     padding: 5px;
@@ -360,6 +376,43 @@
     border: none;
     border-radius: 5px;
   }
+
+  .input-button-container {
+    position: relative;
+    display: inline-block;
+
+  }
+
+  .input-button-container input {
+    padding-right: 60px; /* Adjust padding to make space for the button */
+    width: 130px;
+    background-color: #000; /* Set background color to black */
+    border: 1.5px solid #a1a1a1; /* Set border color to white */
+    color: #E1E1E1;
+    font-weight: normal;
+    font-family: Lora, serif;
+  }
+
+  .input-button-container .add-button {
+    margin-top: 12px;
+    position: absolute;
+    right: 3px;
+    top: 0;
+    height: 100%;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+    width: 24px; /* Set the desired width */
+    height: 24px; /* Set the desired height */
+  }
+
+  .chapter-list-container {
+    text-align: left; /* Align content to the left */
+    color: #E1E1E1;
+    font-weight: normal;
+    font-family: Lora, serif;
+  }
+
+
 
   html, body {
     height: 100%;
@@ -374,6 +427,7 @@
     margin-top: 40px; /* Add a top margin equal to the nav bar's height */
     display: flex;
     flex-direction: column;
+
     background-color: #000000;
   }
 
@@ -398,6 +452,7 @@
     background-size: cover;
   }
 
+
   .main-content {
     flex-grow: 1;
 
@@ -407,25 +462,30 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
   }
 
   .instructions-button {
-    padding: 10px 20px;
+    font-size: 14px;
+    padding: 8px 15px;
     background-color: #1f67b4;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-weight: normal;
+    font-family: Lora, serif;
   }
-  
+
   .instructions-button:hover {
     background-color: #0056b3;
   }
-  
+
   .chapter-header {
     margin-bottom: 20px;
   }
-  
+
   .instructions,
   .character-select,
   .character-list,
@@ -444,17 +504,23 @@
 
 
   .character-select, .character-list {
-    flex: 1; /* 让两个区域自动填满剩余空间 */
+    flex: 1;
     background-color: rgba(62, 64, 74, 0.9);
     padding: 20px;
     border-radius: 8px;
-    overflow-y: auto; /* 单独设置滚动条 */
+    overflow-y: auto; /* 启用垂直滚动 */
+    max-height: 400px; /* 设置固定的最大高度 */
+    scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
+    scrollbar-width: thin; /* 可以为 auto, thin 或 none */
+
   }
-  
+
+
+
   .character-box:hover {
     background-color: #666;
   }
-  
+
   .character-list .character-card {
     background-color: #25272f;
     border-radius: 7px;
@@ -463,16 +529,16 @@
   }
 
   .character-list .no-characters {
-  color: grey; 
+  color: grey;
   font-style: italic;
   }
-  
+
   .character-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
   }
-  
+
   .story-box textarea {
     width: 850px;
     height: 300px;
@@ -483,7 +549,7 @@
     padding: 10px;
     resize: none;
   }
-  
+
   .story-box textarea::placeholder {
     color: #bbb;
   }
@@ -491,8 +557,15 @@
   .scrollable-container {
     scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
     scrollbar-width: thin; /* 可以为 auto, thin 或 none */
+    -webkit-border-radius: 12px;
+
   }
 
+  ::-webkit-scrollbar {
+    width: 20px;
+  }
+
+  /* Track */
 
   .modal-overlay {
     position: fixed;
@@ -530,6 +603,10 @@
   .instructions {
     color: #333;
   }
+
+  /* width */
+
+
 
 
   </style>
