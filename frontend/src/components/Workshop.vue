@@ -491,7 +491,8 @@
   .character-list,
   .story-box {
     margin-bottom: 20px;
-
+    font-weight: normal;
+    font-family: Lora, serif;
   }
 
   .character-sections {
