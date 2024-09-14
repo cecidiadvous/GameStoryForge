@@ -20,7 +20,7 @@ const routes = [
     },
 
     {
-        path: '/workshop/:id', // 动态路由，:id 表示游戏 ID
+        path: '/workshop/:gameId', // 动态路由，:id 表示游戏 ID
         meta: { requiresAuth: true },
         component: Workshop,
     },
