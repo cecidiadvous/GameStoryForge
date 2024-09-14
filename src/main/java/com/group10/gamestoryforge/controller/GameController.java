@@ -59,6 +59,17 @@ public class GameController {
 
     }
 
+    @GetMapping("/{gameId}")
+    public ResponseEntity<Game> getGameById(@PathVariable Long gameId) {
+        Game game = gameService.getGameById(gameId);
+        System.out.println("Game retrieved: " + game.getName());
+        if (game != null) {
+            return ResponseEntity.ok(game);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // 更新游戏
     @PutMapping("/{gameId}")
     public ResponseEntity<Game> updateGame(

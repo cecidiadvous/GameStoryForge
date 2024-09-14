@@ -15,19 +15,21 @@ public class ChapterController {
     @Autowired
     private ChapterService chapterService;
 
-    @GetMapping
-    public List<Chapter> getAllChapters() {
-        return chapterService.getAllChapters();
-    }
+//    @GetMapping
+//    public List<Chapter> getAllChapters() {
+//        return chapterService.getAllChapters();
+//    }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Chapter> getChapterById(@PathVariable Integer id) {
-        Chapter chapter = chapterService.getChapterById(id).orElseThrow();
-        return ResponseEntity.ok(chapter);
+    @GetMapping
+    public List<Chapter> getChaptersByGameId(@RequestParam Integer gameId) {
+
+
+        return chapterService.getChaptersByGameId(gameId);
     }
 
     @PostMapping
     public Chapter createChapter(@RequestBody Chapter chapter) {
+
         return chapterService.createChapter(chapter);
     }
 

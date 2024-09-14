@@ -171,7 +171,7 @@ export default {
   },
   data() {
     return {
-      projectTitle: 'Elden Ring',
+      projectTitle: '',
       chapters: [],
       newChapterName: '',
       selectedChapter: {},
@@ -183,14 +183,29 @@ export default {
       editableCharacter: null, // The character being edited
     };
   },
+  async mounted() {
+    const gameId = this.$route.params.gameId;
+    await this.fetchGameName(gameId);
+    await this.fetchChapters(gameId);
+    // await this.fetchCharactersForGame(gameId);
+  },
   methods: {
     async logout() {
       localStorage.removeItem('user');
-      this.$router.push('/login');
+      this.$router.push('/auth');
     },
-    async fetchChapters() {
+
+    async fetchGameName(gameId) {
       try {
-        const response = await axios.get('/api/chapters');
+        const response = await axios.get(`/api/dashboard/games/${gameId}`);
+        this.projectTitle = response.data.name;
+      } catch (error) {
+        console.error('Error fetching game name:', error);
+      }
+    },
+    async fetchChapters(gameId) {
+      try {
+        const response = await axios.get(`/api/chapters?gameId=${gameId}`);
         this.chapters = response.data;
       } catch (error) {
         console.error('Error fetching chapters:', error);
@@ -198,10 +213,11 @@ export default {
     },
     async addChapter() {
       if (this.newChapterName.trim() !== '') {
+        const gameId = this.$route.params.gameId; // Retrieve gameId from route parameters
         const newChapter = {
           name: this.newChapterName,
           description: '',
-          gameId: 1, // Replace with actual game ID
+          gameId: parseInt(gameId, 10), // Ensure gameId is an integer
           userText: '',
           systemText: '',
         };
@@ -272,11 +288,7 @@ export default {
       this.showInstructions = !this.showInstructions;
     },
   },
-  async mounted() {
-    await this.fetchChapters();
-    await this.fetchCharactersForGame();
 
-  }
 };
 </script>
 

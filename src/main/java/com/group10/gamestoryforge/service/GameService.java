@@ -40,6 +40,11 @@ public class GameService {
         return gameRepository.save(game);
     }
 
+    public Game getGameById(Long gameId) {
+        return gameRepository.findById(gameId)
+                .orElseThrow(() -> new IllegalArgumentException("Game not found: " + gameId));
+    }
+
     // 保存游戏图片
     public String saveGameImage(MultipartFile image) {
         String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
