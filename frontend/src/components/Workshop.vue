@@ -46,7 +46,9 @@
 
     <!-- Scrollable container for main content -->
     <div class="main-content-container">
-      <div class="scrollable-container">
+      <div :style="{ backgroundImage: `url(${backgroundImage})` }" class="scrollable-container">
+<!--        <img :src="backgroundImage" alt="Background Image" />-->
+
         <main class="main-content">
           <div class="top-bar">
             <header class="chapter-header">
@@ -164,6 +166,7 @@
 <script>
 import Modal from './Modal.vue';
 import axios from 'axios';
+import backgroundImage from '@/assets/background.png';
 
 export default {
   components: {
@@ -171,7 +174,9 @@ export default {
   },
   data() {
     return {
+      defaultImage: backgroundImage,
       projectTitle: '',
+      backgroundImage: '',
       chapters: [],
       newChapterName: '',
       selectedChapter: {},
@@ -199,6 +204,9 @@ export default {
       try {
         const response = await axios.get(`/api/dashboard/games/${gameId}`);
         this.projectTitle = response.data.name;
+        this.backgroundImage = response.data.image
+            ? encodeURI(`http://localhost:8080${response.data.image}`)
+            : this.defaultImage;
       } catch (error) {
         console.error('Error fetching game name:', error);
       }
@@ -492,7 +500,7 @@ html, body {
   background-color: #f4f4f4;
   border-radius: 12px;
   margin: 0 8px 8px 0;
-  background: url('@/assets/background.png') no-repeat center center;
+  //background: url('http://localhost:8080/uploads/images/51c43978-71e3-4b5f-a2d4-21f772de4f02_Screenshot 2024-08-24 095635.png');
   background-size: cover;
 }
 
@@ -565,12 +573,19 @@ html, body {
 
 
 
-.character-select-wrapper h3, .character-list-wrapper h3 {
+.character-select-wrapper h3 {
   margin-bottom: 12px;
   margin-top: 12px;
   font-weight: normal;
   font-family: Lora, serif;
   }
+
+.character-list-wrapper h3 {
+  margin-bottom: 12px;
+  margin-top: 16px;
+  font-weight: normal;
+  font-family: Lora, serif;
+}
 
 .character-sections {
   display: flex;
@@ -593,7 +608,7 @@ html, body {
   padding: 20px;
   border-radius: 12px;
   overflow-y: auto; /* 启用垂直滚动 */
-  height: 630px; /* 设置固定的最大高度 */
+  height: 626px; /* 设置固定的最大高度 */
   scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
   scrollbar-width: thin; /* 可以为 auto, thin 或 none */
   margin-bottom: 0px;
@@ -709,9 +724,12 @@ html, body {
   scrollbar-width: thin; /* 可以为 auto, thin 或 none */
 }
 
-.story-box textarea::placeholder {
-  color: #bbb;
+.story-box textarea:focus {
+  outline: none; /* Remove the default focus outline */
+  /* Optionally, add custom focus styles */
+  border: none; /* Remove any border */
 }
+
 
 .create-button {
   margin-top: 1px;
