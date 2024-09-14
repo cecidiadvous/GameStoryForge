@@ -64,7 +64,7 @@
               <h3>Character Select</h3>
               <section class="character-select">
                 <div v-if="selectedCharacters.length === 0" class="no-characters">
-                  There is no character selected.
+<!--                  There is no character selected.-->
                 </div>
                 <div class="character-box" v-else v-for="character in selectedCharacters" :key="character.characterId">
                   <div class="character-select-card">
@@ -74,12 +74,14 @@
                 </div>
               </section>
             </div>
-
+              <div class="story-box-wrapper">
               <section class="story-box">
                 <textarea v-model="storyDescription" placeholder="Describe the style and story of the game"></textarea>
+                <img src="@/assets/create_button3.svg" @click="createStory" class="create-button" alt="Create Story"/>
               </section>
-
+              </div>
             </div>
+
             <div class="character-list-wrapper">
               <h3>Character List</h3>
               <section class="character-list">
@@ -102,6 +104,9 @@
             </div>
           </div>
 
+          <section class="storyline-box">
+            <textarea v-model="storylineDescription" ></textarea>
+          </section>
         </main>
       </div>
     </div>
@@ -431,6 +436,8 @@ export default {
   height: 24px; /* Set the desired height */
 }
 
+
+
 .chapter-list-container {
   text-align: left; /* Align content to the left */
   color: #E1E1E1;
@@ -480,6 +487,8 @@ html, body {
 
 .main-content {
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 
 }
 
@@ -518,28 +527,31 @@ html, body {
   margin-bottom: 20px;
   font-weight: normal;
   font-family: Lora, serif;
+
 }
 
-.story-box {
-  width: 500px;
-}
+
 
 .character-list-wrapper {
-  background-color: rgba(62, 64, 74, 0.9); /* Adjust the border color and width as needed */
-  border-radius: 8px; /* Optional: Add border radius */
+  background-color: rgba(62, 64, 74, 0.95); /* Adjust the border color and width as needed */
+  border-radius: 12px; /* Optional: Add border radius */
   width: 400px;
   padding: 0;
-  height: 740px;
+  height: 748px;
 }
 
 .character-select-wrapper {
-  background-color: rgba(62, 64, 74, 0.9); /* Adjust the border color and width as needed */
-  border-radius: 8px; /* Optional: Add border radius */
-  width: 520px;
+  background-color: rgba(62, 64, 74, 0.95); /* Adjust the border color and width as needed */
+  border-radius: 12px; /* Optional: Add border radius */
+  width: 512px;
   padding: 0;
   margin-bottom: 30px;
   height: 355px;
+  border: 4px dashed #adadad;
+
 }
+
+
 
 .character-select-wrapper h3, .character-list-wrapper h3 {
   margin-bottom: 12px;
@@ -567,9 +579,9 @@ html, body {
   flex: 1;
   background-color: rgba(62, 64, 74, 0);
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow-y: auto; /* 启用垂直滚动 */
-  height: 620px; /* 设置固定的最大高度 */
+  height: 630px; /* 设置固定的最大高度 */
   scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
   scrollbar-width: thin; /* 可以为 auto, thin 或 none */
   margin-bottom: 0px;
@@ -578,7 +590,7 @@ html, body {
 
 .character-select {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* 自动填充列 */
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* 自动填充列 */
   grid-auto-rows: 70px; /* 设置每行卡片的高度 */
   gap: 10px; /* 卡片之间的间距 */
   max-height: 280px; /* 设置最大高度，限制行数 */
@@ -626,6 +638,10 @@ html, body {
   cursor: pointer;
 }
 
+.unselect-button:hover {
+  filter:  brightness(1.2); /* Add a hover effect */
+}
+
 .character-list .no-characters {
   color: grey;
   font-style: italic;
@@ -645,18 +661,84 @@ html, body {
   height: 30px; /* Adjust the size as needed */
 }
 
+.add-character-image:hover {
+  filter: brightness(1.2); /* Add a hover effect */
+}
+
+.story-box {
+  width: 520px;
+  flex: 1;
+}
+
+.story-box-wrapper {
+  background-color: rgba(62, 64, 74, 0.95); /* Adjust the border color and width as needed */
+  border-radius: 12px; /* Optional: Add border radius */
+  width: 520px;
+  padding: 0;
+  margin-bottom: 30px;
+  height: 355px;
+}
+
 .story-box textarea {
-  width: 480px;
-  height: 315px;
-  background-color: rgba(62, 64, 74, 0.9);
+  margin-top: 15px;
+  padding: 0 10px 15px 20px;
+  width: 490px;
+  height: 275px;
+  background-color: rgba(62, 64, 74, 0);
   color: #fff;
   border: none;
-  border-radius: 5px;
-  padding: 20px;
+  border-radius: 12px;
+
   resize: none;
+  font-weight: normal;
+  font-family: Lora, serif;
+  font-size: 16px;
+  scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
+  scrollbar-width: thin; /* 可以为 auto, thin 或 none */
 }
 
 .story-box textarea::placeholder {
+  color: #bbb;
+}
+
+.create-button {
+  margin-top: 1px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  width: 37px; /* Adjust the size as needed */
+  height: 37px; /* Adjust the size as needed */
+  padding: 0;
+}
+
+.create-button:hover {
+  filter: brightness(1.2); /* Add a hover effect */
+}
+
+.storyline-box {
+  display: flex;
+  gap: 30px; /* Space between the two sections */
+  width: 900px;
+  margin: 10px auto;
+  height: 300px;
+  margin-top: 10px;
+}
+
+
+.storyline-box textarea {
+  width: 860px;
+  height: 300px;
+  background-color: rgba(62, 64, 74, 0.95);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 20px;
+  resize: none;
+  font-weight: normal;
+  font-family: Lora, serif;
+  font-size: 16px;
+}
+
+.storyline-box textarea::placeholder {
   color: #bbb;
 }
 
@@ -687,9 +769,9 @@ html, body {
 }
 
 .modal-content {
-  background-color: white;
+  background-color: #000000;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 50%; /* 可根据需要调整宽度 */
   max-width: 600px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -704,11 +786,21 @@ html, body {
   border: none;
   font-size: 18px;
   cursor: pointer;
+  color: #ffffff;
 }
 
 .instructions {
-  color: #333;
+  color: #ffffff;
+  text-align: left;
+
 }
+
+.instructions h3 {
+  margin-top: 10px;
+  text-align: center;
+
+}
+
 
 /* width */
 
