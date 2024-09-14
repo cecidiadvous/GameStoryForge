@@ -187,7 +187,7 @@ export default {
     const gameId = this.$route.params.gameId;
     await this.fetchGameName(gameId);
     await this.fetchChapters(gameId);
-    // await this.fetchCharactersForGame(gameId);
+    await this.fetchCharactersForGame(gameId);
   },
   methods: {
     async logout() {
@@ -234,10 +234,10 @@ export default {
     selectChapter(chapter) {
       this.selectedChapter = chapter;
     },
-    async fetchCharactersForGame() { //params - gameID????????????????
+    async fetchCharactersForGame(gameId) {
       try {
-        const response = await axios.get(`/api/characters`);
-        this.availableCharacters = response.data
+        const response = await axios.get(`/api/characters?gameId=${gameId}`);
+        this.availableCharacters = response.data;
       } catch (error) {
         console.error('Error fetching characters:', error);
       }

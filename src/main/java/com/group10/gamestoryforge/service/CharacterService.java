@@ -14,6 +14,9 @@ public class CharacterService {
     @Autowired
     private CharacterRepository characterRepository;
 
+    public List<Character> getCharactersByGameId(Integer gameId) {
+        return characterRepository.findByGameId(gameId);
+    }
     public List<Character> getAllCharacters() {
         return characterRepository.findAll();
     }
