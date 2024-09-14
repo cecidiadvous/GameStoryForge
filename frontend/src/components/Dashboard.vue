@@ -252,8 +252,10 @@ export default {
 }
 
 .navbar-right .logout-text:hover {
-  color: #ffffff;
+  text-decoration: underline;
 }
+
+
 
 .navbar-left h2 {
   margin: 0;
