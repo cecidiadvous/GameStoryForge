@@ -16,8 +16,9 @@ public class CharacterController {
     private CharacterService characterService;
 
     @GetMapping
-    public List<Character> getAllCharacters() {
-        return characterService.getAllCharacters();
+    public ResponseEntity<List<Character>> getCharactersByGameId(@RequestParam Integer gameId) {
+        List<Character> characters = characterService.getCharactersByGameId(gameId);
+        return ResponseEntity.ok(characters);
     }
 
     @PostMapping

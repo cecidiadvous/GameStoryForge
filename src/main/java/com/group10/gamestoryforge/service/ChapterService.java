@@ -22,7 +22,10 @@ public class ChapterService {
     public Optional<Chapter> getChapterById(Integer id) {
         return chapterRepository.findById(id);
     }
-
+    public List<Chapter> getChaptersByGameId(Integer gameId) {
+        System.out.println("gameId: " + chapterRepository.findByGameId(gameId));
+        return chapterRepository.findByGameId(gameId);
+    }
     public Chapter createChapter(Chapter chapter) {
         return chapterRepository.save(chapter);
     }

@@ -86,7 +86,9 @@ export default {
           const response = await axios.get(`/api/dashboard/games?username=${user.username}`);
           this.games = response.data.map(game => {
             // 如果游戏有图片，确保完整的图片URL
-            game.image = game.image ? `http://localhost:8080${game.image}` : this.defaultImage;
+            game.image = game.image
+                ? encodeURI(`http://localhost:8080${game.image}`)
+                : this.defaultImage;
             return game;
           });
           console.log('myGames:', this.games);
@@ -252,8 +254,10 @@ export default {
 }
 
 .navbar-right .logout-text:hover {
-  color: #ffffff;
+  text-decoration: underline;
 }
+
+
 
 .navbar-left h2 {
   margin: 0;
@@ -305,6 +309,7 @@ export default {
   height: 80%; /* 确保图片充满容器 */
   border-radius: 12px 12px 0px 0px;
   object-fit: cover; /* 自动裁剪图片以适应容器 */
+  cursor: pointer;
 }
 
 .game-info {
