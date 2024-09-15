@@ -22,7 +22,7 @@
       </div>
     </div>
   </template>
-  
+
   <script>
   export default {
     props: {
@@ -38,7 +38,7 @@
     },
   };
   </script>
-  
+
   <style scoped>
   .modal-overlay {
     position: fixed;
@@ -52,15 +52,15 @@
     justify-content: center;
     z-index: 1000;
   }
-  
+
   .modal-content {
-    background: rgb(2, 2, 2);
+    background: rgb(69, 70, 76);
     padding: 20px;
     border-radius: 8px;
     max-width: 500px;
     width: 100%;
   }
-  
+
   .modal-header {
     display: flex;
     justify-content: space-between;
@@ -68,18 +68,18 @@
     border-bottom: 1px solid #ddd;
     padding-bottom: 10px;
   }
-  
+
   .modal-body {
     padding: 20px 0;
   }
-  
+
   .modal-footer {
     display: flex;
     justify-content: flex-end;
     padding-top: 10px;
     border-top: 1px solid #ddd;
   }
-  
+
   .close-button {
     background: transparent;
     border: none;
@@ -87,4 +87,3 @@
     cursor: pointer;
   }
   </style>
-  

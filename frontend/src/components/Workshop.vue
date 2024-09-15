@@ -130,35 +130,57 @@
       </div>
     </div>
 
-    <Modal :visible="isEditModalVisible" @close="closeEditModal">
-      <template #header>
-        <h2>Edit Character</h2>
-      </template>
-      <template #body>
-        <form @submit.prevent="updateCharacter">
-          <div>
-            <label for="character-name">Name:</label>
-            <input id="character-name" v-model="editableCharacter.name" required/>
-          </div>
-          <div>
-            <label for="character-role">Role:</label>
-            <input id="character-role" v-model="editableCharacter.role" required/>
-          </div>
-          <div>
-            <label for="character-ability">Ability:</label>
-            <input id="character-ability" v-model="editableCharacter.ability" required/>
-          </div>
-          <div>
-            <label for="character-background">Background:</label>
-            <textarea id="character-background" v-model="editableCharacter.background"></textarea>
-          </div>
-          <button type="submit">Save</button>
-        </form>
-      </template>
-      <template #footer>
-        <button @click="closeEditModal">Close</button>
-      </template>
-    </Modal>
+    <div v-if="isEditModalVisible" class="modal-overlay">
+      <div class="modal-content">
+        <header class="modal-header">
+          <h2>Edit Character</h2>
+        </header>
+        <section class="modal-body">
+          <form @submit.prevent="updateCharacter">
+            <!-- Flexbox 布局 -->
+            <div class="form-container">
+              <!-- 左边显示图片的正方形框以及图片上传 -->
+              <div class="image-section">
+                <label for="character-image">Character Image:</label>
+                <div class="image-preview-box">
+                  <img v-if="imageUrl" :src="imageUrl" alt="Character Image" class="image-preview" />
+                  <div v-else class="placeholder">No Image</div>
+                </div>
+                <!-- Character Image 上传框在图片展示框的下面 -->
+                <div class="image-upload">
+
+                  <input id="character-image" type="file" @change="handleImageUpload" />
+                </div>
+              </div>
+              <!-- 右边表单内容 -->
+              <div class="form-fields">
+                <div>
+                  <label for="character-name">Name:</label>
+                  <input id="character-name" v-model="editableCharacter.name" required />
+                </div>
+                <div>
+                  <label for="character-role">Role:</label>
+                  <input id="character-role" v-model="editableCharacter.role" required />
+                </div>
+                <div>
+                  <label for="character-ability">Ability:</label>
+                  <input id="character-ability" v-model="editableCharacter.ability" required />
+                </div>
+              </div>
+            </div>
+            <!-- Background 区域单独放在下面 -->
+            <div class="background-section">
+              <label for="character-background">Background:</label>
+              <textarea id="character-background" v-model="editableCharacter.background"></textarea>
+            </div>
+            <div class="modal-footer">
+              <button type="submit">Save</button>
+              <button @click="closeEditModal" type="button">Cancel</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -186,6 +208,7 @@ export default {
       showInstructions: false,
       isEditModalVisible: false,
       editableCharacter: null, // The character being edited
+      imageUrl: null,
     };
   },
   async mounted() {
@@ -251,8 +274,9 @@ export default {
       }
     },
     openAddCharacterModal() {
-      this.editableCharacter = {name: '', role: '', ability: '', background: ''};
-      this.isEditModalVisible = true;
+      this.editableCharacter = { name: '', role: '', ability: '', background: '', image: null }; // 初始化空白角色
+      this.imageUrl = null; // 确保图片为空
+      this.isEditModalVisible = true; // 显示添加角色的模态框
     },
     selectCharacter(character) {
       if (!this.selectedCharacters.find(c => c.characterId === character.characterId)) {
@@ -264,23 +288,55 @@ export default {
 
     },
     openEditModal(character) {
-      this.editableCharacter = {...character};
-      this.isEditModalVisible = true;
+      this.editableCharacter = { ...character }; // 将当前角色的信息深拷贝到 editableCharacter
+      this.imageUrl = character.image || null;   // 如果有角色图片，则设置为 imageUrl
+      this.isEditModalVisible = true;            // 显示编辑模态框
     },
     closeEditModal() {
-      this.isEditModalVisible = false;
-      this.editableCharacter = null;
+      this.isEditModalVisible = false;           // 隐藏模态框
+      this.editableCharacter = null;             // 清空编辑的角色信息
+      this.imageUrl = null;                      // 重置图片预览
+    },
+    handleImageUpload(event) {
+      const file = event.target.files[0];
+      this.imageUrl = URL.createObjectURL(file);
     },
     async updateCharacter() {
-      const index = this.availableCharacters.findIndex(c => c.characterId === this.editableCharacter.characterId);
-      if (index !== -1) {
-        try {
-          const response = await axios.put(`/api/characters/${this.editableCharacter.characterId}`, this.editableCharacter);
-          this.availableCharacters[index] = response.data;
-          this.closeEditModal();
-        } catch (error) {
-          console.error('Error updating character:', error);
+      try {
+        // 检查是否有 characterId，判断是添加角色还是更新角色
+        if (this.editableCharacter.characterId) {
+          // 更新角色的逻辑
+          const index = this.availableCharacters.findIndex(c => c.characterId === this.editableCharacter.characterId);
+          if (index !== -1) {
+            const response = await axios.put(`/api/characters/${this.editableCharacter.characterId}`, this.editableCharacter);
+            this.availableCharacters[index] = response.data; // 更新角色信息
+          }
+        } else {
+          // 添加新角色的逻辑
+          const formData = new FormData();
+          const gameId = this.$route.params.gameId
+          formData.append('character', JSON.stringify({
+            name: this.editableCharacter.name,
+            role: this.editableCharacter.role,
+            ability: this.editableCharacter.ability,
+            background: this.editableCharacter.background,
+            gameId: gameId,  // 将 gameId 也添加进去
+          }));
+          if (this.editableCharacter.image) {
+            formData.append('image', this.editableCharacter.image);
+          }
+          const response = await axios.post('/api/characters', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          this.availableCharacters.push(response.data);
         }
+
+        // 关闭模态框并重置状态
+        this.closeEditModal();
+      } catch (error) {
+        console.error('Error saving character:', error);
       }
     },
     async removeCharacter(id) {
@@ -785,39 +841,152 @@ html, body {
 
 /* Track */
 
+
+
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* 半透明背景 */
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1001; /* 保证在最顶层 */
+  z-index: 1001;
+
 }
 
 .modal-content {
-  background-color: #000000;
+  background: #3f3f48;
   padding: 20px;
-  border-radius: 12px;
-  width: 50%; /* 可根据需要调整宽度 */
-  max-width: 600px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  position: relative;
+  border-radius: 8px;
+  width: 400px;
+
+  font-family: 'Lora', serif;
+  color: #D2D2D2;
 }
 
-.close-modal {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: #ffffff;
+.form-container {
+  display: flex;
+  gap: 35px; /* 图片和表单字段之间的间距 */
 }
+
+.image-section {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+  gap: 10px; /* 图片和上传框之间的间距 */
+  justify-content: center;
+  align-items: center;
+}
+.image-preview-box {
+  width: 146px;
+  height: 146px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  border: 2px solid #A4A4A4;
+}
+
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #A4A4A4;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.form-fields label {
+  text-align: left; /* 确保标签文字左对齐 */
+  display: block;
+  margin-bottom: 5px; /* 给标签和输入框之间增加一些间距 */
+  font-size: 16px;
+}
+
+.image-upload input[type="file"],
+.form-fields input {
+  width: 194px;
+  height: 41px;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 2px solid #A4A4A4;
+  border-radius: 8px;
+  background: #3f3f46;
+  color: #D2D2D2;
+  font-family: 'Lora', serif;
+  box-sizing: border-box;
+}
+
+.image-upload input[type="file"] {
+  width: 150px;
+  height: 41px;
+}
+
+.modal-header {
+  position: relative; /* 使关闭按钮绝对定位 */
+  text-align: center; /* 使标题居中 */
+  padding-bottom: 10px;
+
+}
+.modal-header h2 {
+  font-size: 24px;
+  font-weight: normal;
+  margin: 0;
+}
+
+
+.background-section label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.background-section textarea {
+  width: 95%;
+  padding: 10px;
+  border: 2px solid #A4A4A4;
+  border-radius: 8px;
+  background: #3f3f46;
+  color: #D2D2D2;
+  font-family: 'Lora', serif;
+  box-sizing: border-box;
+  resize: none;
+  height: 100px;
+}
+
+
+
+.modal-footer {
+  display: flex;
+  justify-content: center; /* 将按钮水平居中 */
+  padding-top: 10px;
+  width: fit-content; /* 确保只根据内容的宽度 */
+  margin: 0 auto;
+  gap: 30px;
+}
+
+.modal-footer button {
+  padding: 10px 20px;
+  background-color: #0776ee;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Lora', serif;
+}
+
+.modal-footer button:hover {
+  background-color: #0056b3;
+}
+
 
 .instructions {
   color: #ffffff;
