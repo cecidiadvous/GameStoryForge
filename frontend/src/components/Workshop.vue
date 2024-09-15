@@ -74,6 +74,23 @@
                   <button @click.stop="removeCharacter(character.characterId)">🗑️</button>
                 </div>
               </div>
+              <!-- Add New Character-->
+              <div class="add-new-character">
+                <!-- <h3>Add a New Character</h3> -->
+                <div>
+                  <label for="new-character-name">Name: </label>
+                  <input id="new-character-name" v-model="newCharacter.name" required />
+                </div>
+                <div>
+                  <label for="new-character-role">Role: </label>
+                  <input id="new-character-role" v-model="newCharacter.role" required />
+                </div>
+                <div>
+                  <label for="new-character-ability">Ability: </label>
+                  <input id="new-character-ability" v-model="newCharacter.ability" required />
+                </div>
+                <button type="button" class="add-character-btn" @click="addCharacter">Add Character</button>
+              </div>
             </section>
           </div>
 
@@ -145,6 +162,7 @@
     data() {
       return {
         projectTitle: 'Elden Ring',
+        gameId: null,
         chapters: [],
         newChapterName: '',
         selectedChapter: {},
@@ -154,6 +172,12 @@
         showInstructions: false,
         isEditModalVisible: false,
         editableCharacter: null, // The character being edited
+        // add new character data
+        newCharacter: {
+          name: '',
+          role: '',
+          ability: ''
+        }
       };
     },
     methods: {
@@ -161,6 +185,30 @@
         localStorage.removeItem('user');
         this.$router.push('/login');
       },
+
+      async addCharacter() {
+        console.log('Add Character button clicked!'); 
+        if (this.newCharacter.name && this.newCharacter.role && this.newCharacter.ability) {
+          try {
+            // Add the gameId to the character before making the request
+            this.newCharacter.gameId = this.gameId;
+
+            const response = await axios.post('/api/characters', this.newCharacter);
+            console.log('Character added successfully:', response.data); 
+            this.availableCharacters.push(response.data);
+
+            // Reset the newCharacter object after the character is added
+            this.newCharacter = { 
+              name: '', 
+              role: '', 
+              ability: '' 
+            };
+          } catch (error) {
+            console.error('Error adding character:', error);
+          }
+        }
+      },
+
       async fetchChapters() {
         try {
           const response = await axios.get('/api/chapters');
@@ -174,7 +222,7 @@
           const newChapter = {
             name: this.newChapterName,
             description: '',
-            gameId: 1, // Replace with actual game ID
+            gameId: this.gameId, // Replace with actual game ID
             userText: '',
             systemText: '',
           };
@@ -242,6 +290,8 @@
       },
     },
     async mounted() {
+      this.gameId = this.$route.params.gameId;
+      console.log("Game ID from route:", this.gameId);
       await this.fetchChapters();
       await this.fetchCharactersForGame();
 
@@ -603,6 +653,147 @@
   .instructions {
     color: #333;
   }
+  .add-new-character {
+    background-color: rgba(62, 64, 74, 0.9); /* Same background as the rest */
+    padding: 30px; /* Add padding for spacing */
+    border-radius: 12px; /* Rounded corners */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    max-width: 400px; /* Limit the width */
+    margin: 40px auto; /* Center the form */
+  }
+
+  .form-group {
+    margin-bottom: 20px; /* Space between form elements */
+  }
+
+  label {
+    display: block; /* Block label for alignment */
+    font-weight: bold; /* Emphasize the label */
+    color: #E1E1E1; /* Light color for contrast */
+    margin-bottom: 8px; /* Add space below label */
+  }
+
+  input {
+    width: 90%; /* Full-width inputs */
+    padding: 12px; /* Comfortable padding */
+    border: 2px solid #555; /* Solid border */
+    border-radius: 8px; /* Rounded corners for inputs */
+    background-color: #25272f; /* Dark background for inputs */
+    color: #e1e1e1; /* Light text color */
+    font-size: 16px; /* Comfortable text size */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2); /* Slight inner shadow */
+  }
+
+  input:focus {
+    outline: none; /* Remove default focus */
+    border-color: #1f67b4; /* Blue border on focus */
+    box-shadow: 0 0 6px rgba(31, 103, 180, 0.5); /* Focus glow */
+  }
+
+  .add-character-btn {
+    background-color: #1f67b4; /* Button color */
+    color: #fff; /* White text */
+    padding: 10px 20px; /* Padding for the button */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded button corners */
+    cursor: pointer; /* Pointer cursor */
+    font-size: 16px; /* Font size */
+    font-weight: bold; /* Bold text */
+    width: 100%; /* Full width button */
+    transition: background-color 0.3s ease; /* Smooth background transition */
+  }
+
+  .add-character-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+
+  .add-character-btn:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Focus glow */
+  }
+
+  .character-select, .character-list {
+    /* Keep the same styles as the existing ones for consistency */
+    flex: 1;
+    background-color: rgba(62, 64, 74, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: 400px;
+    scrollbar-color: #989898 #2c2c2c;
+    scrollbar-width: thin;
+  }
+
+  .character-select .no-characters, .character-list .no-characters {
+    color: grey;
+    font-style: italic;
+  }
+
+  .character-box:hover {
+    background-color: #666;
+  }
+
+  .character-list .character-card {
+    background-color: #25272f;
+    border-radius: 7px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .character-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .story-box textarea {
+    width: 850px;
+    height: 300px;
+    background-color: rgba(62, 64, 74, 0.9);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    resize: none;
+  }
+
+  .story-box textarea::placeholder {
+    color: #bbb;
+  }
+
+  .add-character-btn {
+    background-color: #1f67b4; /* Primary blue */
+    color: #fff; /* White text */
+    padding: 12px 20px; /* Padding for better click area */
+    margin-top: 20px;
+    border: none; /* No border */
+    border-radius: 8px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor */
+    font-size: 18px; /* Larger font */
+    font-weight: bold; /* Bold text */
+    text-align: center; /* Center the text */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions */
+    width: 100%; /* Full-width button */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  }
+
+  .add-character-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: translateY(-2px); /* Lift the button on hover */
+  }
+
+  .add-character-btn:focus {
+    outline: none; /* Remove the default focus outline */
+    box-shadow: 0 0 8px rgba(31, 103, 180, 0.8); /* Focus glow */
+  }
+
+  .add-character-btn:active {
+    background-color: #004080; /* Darker on click */
+    transform: translateY(0); /* Press down */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Decrease shadow */
+  }
+
+  
 
   /* width */
 

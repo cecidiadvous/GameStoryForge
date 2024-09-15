@@ -21,8 +21,9 @@ public class CharacterController {
     }
 
     @PostMapping
-    public Character createCharacter(@RequestBody Character character) {
-        return characterService.createCharacter(character);
+    public ResponseEntity<Character> addCharacter(@RequestBody Character character) {
+        Character newCharacter = characterService.createCharacter(character);
+        return ResponseEntity.ok(newCharacter);
     }
 
     @PutMapping("/{id}")

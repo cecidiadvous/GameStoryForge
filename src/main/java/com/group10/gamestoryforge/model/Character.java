@@ -17,7 +17,7 @@ public class Character {
     @Column(nullable = false)
     private String role;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String background;
 
     @Column(nullable = false)
