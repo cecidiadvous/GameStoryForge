@@ -211,7 +211,11 @@
 
       async fetchChapters() {
         try {
-          const response = await axios.get('/api/chapters');
+          const response = await axios.get(`/api/chapters`, {
+            params: {
+              gameId: this.gameId // Include gameId as a query parameter
+            }
+          });
           this.chapters = response.data;
         } catch (error) {
           console.error('Error fetching chapters:', error);
@@ -239,9 +243,13 @@
       selectChapter(chapter) {
         this.selectedChapter = chapter;
       },
-      async fetchCharactersForGame() { //params - gameID????????????????
+      async fetchCharactersForGame() { 
         try {
-          const response = await axios.get(`/api/characters`);
+          const response = await axios.get(`/api/characters`, {
+            params: {
+              gameId: this.gameId // Include gameId as a query parameter
+            }
+          });
           this.availableCharacters = response.data
         } catch (error) {
           console.error('Error fetching characters:', error);
