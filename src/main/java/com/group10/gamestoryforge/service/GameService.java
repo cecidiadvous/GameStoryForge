@@ -60,7 +60,7 @@ public class GameService {
     }
 
     // 删除旧图片
-    private void deleteGameImage(String imagePath) {
+    public void deleteGameImage(String imagePath) {
         if (imagePath != null) {
             Path pathToDelete = Paths.get(System.getProperty("user.dir") + imagePath);
             try {

@@ -93,13 +93,14 @@
                 </div>
                 <div v-else v-for="character in availableCharacters" :key="character.characterId" class="character-card"
                      @click="selectCharacter(character)">
+                  <div class="character-header">
+                    <img @click.stop="openEditModal(character)" src="@/assets/edit_button.svg" class="edit-icon" alt="Edit Character"/>
+                    <img :src=character.image alt="Character Image" class="character-image"/>
+                    <img @click.stop="removeCharacter(character.characterId)" src="@/assets/delete_icon.svg" class="delete-icon" alt="Delete Character"/>
+                  </div>
                   <p><strong>Name:</strong> {{ character.name }}</p>
                   <p><strong>Role:</strong> {{ character.role }}</p>
                   <p><strong>Ability:</strong> {{ character.ability }}</p>
-                  <div class="character-actions">
-                    <button @click.stop="openEditModal(character)">✏️</button>
-                    <button @click.stop="removeCharacter(character.characterId)">🗑️</button>
-                  </div>
                 </div>
               </section>
               <img src="@/assets/character_add.svg" @click="openAddCharacterModal" class="add-character-image" alt="Add Character"/>
@@ -156,15 +157,15 @@
               <div class="form-fields">
                 <div>
                   <label for="character-name">Name:</label>
-                  <input id="character-name" v-model="editableCharacter.name" required />
+                  <input id="character-name" v-model="editableCharacter.name" autocomplete="off" required />
                 </div>
                 <div>
                   <label for="character-role">Role:</label>
-                  <input id="character-role" v-model="editableCharacter.role" required />
+                  <input id="character-role" v-model="editableCharacter.role" autocomplete="off" required />
                 </div>
                 <div>
                   <label for="character-ability">Ability:</label>
-                  <input id="character-ability" v-model="editableCharacter.ability" required />
+                  <input id="character-ability" v-model="editableCharacter.ability" autocomplete="off" required />
                 </div>
               </div>
             </div>
@@ -268,7 +269,13 @@ export default {
     async fetchCharactersForGame(gameId) {
       try {
         const response = await axios.get(`/api/characters?gameId=${gameId}`);
-        this.availableCharacters = response.data;
+        this.availableCharacters = response.data.map(character => {
+          // 如果角色有图片，确保完整的图片URL
+          character.image = character.image
+              ? encodeURI(`http://localhost:8080${character.image}`)
+              : this.defaultImage;
+          return character;
+        });
       } catch (error) {
         console.error('Error fetching characters:', error);
       }
@@ -299,44 +306,57 @@ export default {
     },
     handleImageUpload(event) {
       const file = event.target.files[0];
-      this.imageUrl = URL.createObjectURL(file);
+      this.imageUrl = URL.createObjectURL(file);  // 预览图片
+      this.editableCharacter.image = file;
     },
     async updateCharacter() {
       try {
-        // 检查是否有 characterId，判断是添加角色还是更新角色
+        const formData = new FormData();
+        const gameId = this.$route.params.gameId;
+
+        formData.append('character', JSON.stringify({
+          name: this.editableCharacter.name,
+          role: this.editableCharacter.role,
+          ability: this.editableCharacter.ability,
+          background: this.editableCharacter.background,
+          gameId: gameId,
+        }));
+
+        if (this.editableCharacter.image) {
+          formData.append('image', this.editableCharacter.image);
+        }
+
         if (this.editableCharacter.characterId) {
-          // 更新角色的逻辑
+          // Update existing character
+          const response = await axios.put(`/api/characters/${this.editableCharacter.characterId}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
           const index = this.availableCharacters.findIndex(c => c.characterId === this.editableCharacter.characterId);
           if (index !== -1) {
-            const response = await axios.put(`/api/characters/${this.editableCharacter.characterId}`, this.editableCharacter);
-            this.availableCharacters[index] = response.data; // 更新角色信息
+            this.availableCharacters[index] = response.data;
+            // Ensure the image URL is properly encoded
+            this.availableCharacters[index].image = this.availableCharacters[index].image
+                ? encodeURI(`http://localhost:8080${this.availableCharacters[index].image}`)
+                : this.defaultImage;
           }
         } else {
-          // 添加新角色的逻辑
-          const formData = new FormData();
-          const gameId = this.$route.params.gameId
-          formData.append('character', JSON.stringify({
-            name: this.editableCharacter.name,
-            role: this.editableCharacter.role,
-            ability: this.editableCharacter.ability,
-            background: this.editableCharacter.background,
-            gameId: gameId,  // 将 gameId 也添加进去
-          }));
-          if (this.editableCharacter.image) {
-            formData.append('image', this.editableCharacter.image);
-          }
+          // Add new character
           const response = await axios.post('/api/characters', formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
           });
+          response.data.image = response.data.image
+              ? encodeURI(`http://localhost:8080${response.data.image}`)
+              : this.defaultImage;
           this.availableCharacters.push(response.data);
         }
 
-        // 关闭模态框并重置状态
         this.closeEditModal();
       } catch (error) {
-        console.error('Error saving character:', error);
+        console.error('Error updating character:', error);
       }
     },
     async removeCharacter(id) {
@@ -699,9 +719,45 @@ html, body {
 .character-list .character-card {
   background-color: #25272f;
   border-radius: 7px;
-  padding: 10px;
+  padding: 5px;
   margin-bottom: 10px;
   cursor: pointer;
+  text-align: center;
+}
+
+.character-card p {
+  margin-top: 0;
+  margin-bottom: 5px;
+  gap: 10px;
+}
+
+.character-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin-top: 5px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.edit-icon, .delete-icon {
+  width: 30px; /* Set the desired width */
+  height: 30px; /* Set the desired height */
+  cursor: pointer;
+  margin-top: -35px;
+}
+
+.edit-icon:hover, .delete-icon:hover {
+  transform: scale(1.1); /* Add a hover effect */
+}
+
+.character-image {
+  width: 50px; /* Set the desired width */
+  height: 50px; /* Set the desired height */
+  object-fit: cover; /* Ensure the image covers the area */
+  border-radius: 50%; /* Make the image circular */
+  margin-bottom: 10px; /* Add some space below the image */
 }
 
 .character-select-card {
@@ -862,9 +918,13 @@ html, body {
   padding: 20px;
   border-radius: 8px;
   width: 400px;
-
   font-family: 'Lora', serif;
   color: #D2D2D2;
+}
+
+.modal-content label {
+  display: block;
+  margin-bottom: 5px;
 }
 
 .form-container {
@@ -876,7 +936,6 @@ html, body {
   display: flex;
   flex-direction: column;
   margin-left: 10px;
-  gap: 10px; /* 图片和上传框之间的间距 */
   justify-content: center;
   align-items: center;
 }
@@ -924,9 +983,11 @@ html, body {
   color: #D2D2D2;
   font-family: 'Lora', serif;
   box-sizing: border-box;
+
 }
 
 .image-upload input[type="file"] {
+  margin-top: 15px;
   width: 150px;
   height: 41px;
 }

@@ -15,7 +15,7 @@
 
     <div class="games-list">
       <div class="game-card" v-for="(game, index) in games" :key="game.gameId">
-        <img :src="game.image || defaultImage" alt="Game image" @click="goToWarkshop(game.gameId)" />
+        <img :src="game.image" alt="Game image" @click="goToWarkshop(game.gameId)" />
 
         <div class="game-info">
           <h3>{{ game.name }}</h3>

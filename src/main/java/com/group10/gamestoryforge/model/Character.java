@@ -26,6 +26,9 @@ public class Character {
     @Column(name = "game_id", nullable = false)
     private Integer gameId;
 
+    @Column(name = "image") // 新增 image 字段
+    private String image;
+
     public Character() {
     }
 
@@ -76,5 +79,13 @@ public class Character {
 
     public void setGameId(Integer gameId) {
         this.gameId = gameId;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

@@ -3,6 +3,7 @@ package com.group10.gamestoryforge.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group10.gamestoryforge.model.Character;
 import com.group10.gamestoryforge.service.CharacterService;
+import com.group10.gamestoryforge.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,30 +28,26 @@ public class CharacterController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Character> addCharacter(
-            @RequestPart("character") String characterJson,   // 接收 JSON 字符串
+            @RequestPart("character") String characterJson,
             @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
 
-        // 将字符串形式的 JSON 转换为 Character 对象
-        ObjectMapper objectMapper = new ObjectMapper();
-        Character character = objectMapper.readValue(characterJson, Character.class);
-
-        // 处理图片文件上传逻辑（如果需要）
-//        if (image != null && !image.isEmpty()) {
-//            String imagePath = characterService.saveCharacterImage(image);
-//            character.setImage(imagePath);
-//        }
-
-        // 处理角色的保存逻辑
-        Character newCharacter = characterService.addCharacter(character);
-
+        // 调用 service 处理业务逻辑
+        Character newCharacter = characterService.addCharacter(characterJson, image);
         return ResponseEntity.status(HttpStatus.CREATED).body(newCharacter);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Character> updateCharacter(@PathVariable Integer id, @RequestBody Character characterDetails) {
-        Character updatedCharacter = characterService.updateCharacter(id, characterDetails);
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Character> updateCharacter(
+            @PathVariable Integer id,
+            @RequestPart("character") String characterJson,
+            @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
+
+        // 调用 service 处理业务逻辑
+        Character updatedCharacter = characterService.updateCharacter(id, characterJson, image);
         return ResponseEntity.ok(updatedCharacter);
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCharacter(@PathVariable Integer id) {
