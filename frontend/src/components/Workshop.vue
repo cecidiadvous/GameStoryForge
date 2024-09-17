@@ -694,7 +694,7 @@ html, body {
 .character-select {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* 自动填充列 */
-  grid-auto-rows: 70px; /* 设置每行卡片的高度 */
+  grid-auto-rows: 90px; /* 设置每行卡片的高度 */
   gap: 10px; /* 卡片之间的间距 */
   max-height: 280px; /* 设置最大高度，限制行数 */
   overflow-y: auto; /* 超出行数时滚动 */
@@ -768,13 +768,15 @@ html, body {
   border-radius: 7px;
   padding: 10px;
   cursor: pointer;
-  width: 120px;
+  width: 150px;
+  height: 70px;
 }
 
 .unselect-button {
   width: 20px; /* Set the desired width */
   height: 20px; /* Set the desired height */
   cursor: pointer;
+  margin-right: -5px;
 }
 
 .unselect-button:hover {
