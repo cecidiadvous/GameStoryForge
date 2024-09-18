@@ -36,9 +36,31 @@
       <div class="chapter-list-container">
         <h3>{{ projectTitle }}</h3>
         <ul>
-          <li v-for="chapter in chapters" :key="chapter.chapterId" @click="selectChapter(chapter)"
-              :class="{ selected: chapter.chapterId === selectedChapter.chapterId }">
-            {{ chapter.name }}
+          <li
+              v-for="chapter in chapters"
+              :key="chapter.chapterId"
+              :class="{ selected: chapter.chapterId === selectedChapter?.chapterId }"
+              class="chapter-item"
+              @click="selectChapter(chapter)" >
+
+
+          <span>
+          {{ chapter.name }}
+        </span>
+          <div class="menu-wrapper">
+            <!-- 三点图标，选中或悬停时显示 -->
+            <button
+                class="menu-button"
+                v-if="chapter.chapterId === selectedChapter?.chapterId || chapter.showMenu"
+                @click.stop="toggleMenu(chapter.chapterId)">
+              &#8942; <!-- 三点符号 -->
+            </button>
+            <!-- 弹出菜单 -->
+            <div v-if="chapter.showMenu" class="menu-dropdown">
+              <button @click="renameChapter(chapter)">Rename</button>
+              <button @click="deleteChapter(chapter.chapterId)" class="delete">Delete</button>
+            </div>
+          </div>
           </li>
         </ul>
       </div>
@@ -64,17 +86,17 @@
             <div class="left-column">
               <div class="character-select-wrapper">
               <h3>Character Select</h3>
-              <section class="character-select">
-                <div v-if="selectedCharacters.length === 0" class="no-characters">
-<!--                  There is no character selected.-->
-                </div>
-                <div class="character-box" v-else v-for="character in selectedCharacters" :key="character.characterId">
-                  <div class="character-select-card">
-                    <span>{{ character.name }}</span>
-                    <img @click.stop="unselectCharacter(character.characterId)" src="@/assets/close.svg" class="unselect-button" alt="Unselect Character"/>
+                <section class="character-select">
+                  <div v-if="selectedCharacters.length === 0" class="no-characters">
+                    There is no character selected.
                   </div>
-                </div>
-              </section>
+                  <div v-else v-for="character in selectedCharacters" :key="character.characterId" class="character-box">
+                    <div class="character-select-card">
+                      <span>{{ character.name }}</span>
+                      <img @click.stop="unselectCharacter(character.characterId)" src="@/assets/close.svg" class="unselect-button" alt="Unselect Character"/>
+                    </div>
+                  </div>
+                </section>
             </div>
               <div class="story-box-wrapper">
               <section class="story-box">
@@ -91,8 +113,7 @@
                 <div v-if="availableCharacters.length === 0" class="no-characters">
                   There is no character.
                 </div>
-                <div v-else v-for="character in availableCharacters" :key="character.characterId" class="character-card"
-                     @click="selectCharacter(character)">
+                <div v-else v-for="character in availableCharacters" :key="character.characterId" class="character-card" @click="addCharacterToChapter(character)">
                   <div class="character-header">
                     <img @click.stop="openEditModal(character)" src="@/assets/edit_button.svg" class="edit-icon" alt="Edit Character"/>
                     <img :src=character.image alt="Character Image" class="character-image"/>
@@ -217,6 +238,11 @@ export default {
     await this.fetchGameName(gameId);
     await this.fetchChapters(gameId);
     await this.fetchCharactersForGame(gameId);
+    document.addEventListener('click', this.handleClickOutside);
+    if (this.chapters.length > 0) {
+      // 如果获取到的章节列表不为空，默认选择第一个章节
+      this.selectChapter(this.chapters[0]);
+    }
   },
   methods: {
     async logout() {
@@ -244,28 +270,99 @@ export default {
       }
     },
     async addChapter() {
-      if (this.newChapterName.trim() !== '') {
-        const gameId = this.$route.params.gameId; // Retrieve gameId from route parameters
-        const newChapter = {
-          name: this.newChapterName,
-          description: '',
-          gameId: parseInt(gameId, 10), // Ensure gameId is an integer
-          userText: '',
-          systemText: '',
-        };
+      const newChapter = {
+        name: this.newChapterName,
+        description: '',
+        userText: '',
+        systemText: ''
+      };
 
-        try {
-          const response = await axios.post('/api/chapters', newChapter);
-          this.chapters.push(response.data);
-          this.newChapterName = '';
-        } catch (error) {
-          console.error('Error adding chapter:', error);
-        }
+      try {
+        // 使用 gameId 构建请求 URL
+        const gameId = parseInt(this.$route.params.gameId, 10);
+
+        // 发送请求时，将 gameId 作为路径参数传递
+        const response = await axios.post(`/api/chapters/game/${gameId}`, newChapter, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('Chapter added:', response.data);
+        this.chapters.push(response.data); // 更新章节列表
+        this.selectChapter(response.data); // 自动选择新添加的章节
+        this.newChapterName = '';
+      } catch (error) {
+        console.error('Error adding chapter:', error);
       }
     },
-    selectChapter(chapter) {
-      this.selectedChapter = chapter;
+
+    renameChapter(chapter) {
+      const newName = prompt('Enter new chapter name:', chapter.name);
+      if (newName && newName.trim() !== '') {
+        axios.put(`/api/chapters/${chapter.chapterId}`, { name: newName.trim() })
+            .then(response => {
+              chapter.name = response.data.name; // 更新本地章节名称
+              this.closeAllMenus();
+            })
+            .catch(error => {
+              console.error('Error renaming chapter:', error);
+            });
+      }
     },
+
+    // 删除章节
+    deleteChapter(chapterId) {
+      if (confirm('Are you sure you want to delete this chapter?')) {
+        // 发送 DELETE 请求删除章节
+        axios.delete(`/api/chapters/${chapterId}`)
+            .then(() => {
+              this.chapters = this.chapters.filter(chapter => chapter.chapterId !== chapterId);
+              this.closeAllMenus();
+            })
+            .catch(error => {
+              console.error('Error deleting chapter:', error);
+            });
+      }
+    },
+    async selectChapter(chapter) {
+      this.selectedChapter = chapter; // 设置当前选中的章节
+
+      try {
+        // 发送请求到后端获取与该章节关联的角色
+        const response = await axios.get(`/api/chapters/${chapter.chapterId}/characters`);
+
+        // 更新 selectedCharacters 列表
+        this.selectedCharacters = response.data;
+
+      } catch (error) {
+        console.error('Error fetching characters for chapter:', error);
+      }
+    },
+
+    toggleMenu(chapterId) {
+      this.chapters = this.chapters.map(chapter => {
+        if (chapter.chapterId === chapterId) {
+          chapter.showMenu = !chapter.showMenu;
+        } else {
+          chapter.showMenu = false; // 隐藏其他菜单
+        }
+        return chapter;
+      });
+    },
+    closeAllMenus() {
+      this.chapters.forEach(chapter => {
+        chapter.showMenu = false;
+      });
+    },
+    handleClickOutside(event) {
+      const menuWrapper = document.querySelector('.menu-dropdown');
+      if (menuWrapper && !menuWrapper.contains(event.target)) {
+        this.closeAllMenus();
+      }
+    },
+
+
     async fetchCharactersForGame(gameId) {
       try {
         const response = await axios.get(`/api/characters?gameId=${gameId}`);
@@ -289,10 +386,6 @@ export default {
       if (!this.selectedCharacters.find(c => c.characterId === character.characterId)) {
         this.selectedCharacters.push(character);
       }
-    },
-    async unselectCharacter(id) {
-      this.selectedCharacters = this.selectedCharacters.filter(character => character.characterId !== id);
-
     },
     openEditModal(character) {
       this.editableCharacter = { ...character }; // 将当前角色的信息深拷贝到 editableCharacter
@@ -371,7 +464,39 @@ export default {
     toggleInstructions() {
       this.showInstructions = !this.showInstructions;
     },
+
+    async addCharacterToChapter(character) {
+      if (!this.selectedCharacters.find(c => c.characterId === character.characterId)) {
+        this.selectedCharacters.push(character); // 前端更新已选角色
+
+        try {
+          // 向后端发送请求，添加角色到当前章节
+          await axios.post(`/api/chapters/${this.selectedChapter.chapterId}/addCharacter`, {
+            characterId: character.characterId,
+          });
+        } catch (error) {
+          console.error('Error adding character to chapter:', error);
+          // 如果请求失败，可以从 selectedCharacters 中移除
+          this.selectedCharacters.pop();
+        }
+      }
+    },
+
+    async unselectCharacter(characterId) {
+      this.selectedCharacters = this.selectedCharacters.filter(character => character.characterId !== characterId);
+
+      try {
+        // 向后端发送请求，移除角色与当前章节的关联
+        await axios.post(`/api/chapters/${this.selectedChapter.chapterId}/removeCharacter`, {
+          characterId,
+        });
+      } catch (error) {
+        console.error('Error removing character from chapter:', error);
+      }
+    },
   },
+
+
 
 };
 </script>
@@ -482,7 +607,8 @@ export default {
   margin: 3px 0;
   cursor: pointer;
   font-size: 18px;
-  padding: 6px 13px;
+  padding: 6px 5px 6px 13px;
+  height: 24px;
 }
 
 .sidebar ul li:hover {
@@ -539,6 +665,74 @@ export default {
   color: #E1E1E1;
   font-weight: normal;
   font-family: Lora, serif;
+}
+
+.chapter-item.selected {
+  background-color: #36373f; /* Highlight color */
+  border-radius: 8px; /* 圆角边框 */
+  color: white; /* 设置选中后字体颜色 */
+}
+
+/* 普通章节样式 */
+.chapter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  position: relative;
+  cursor: pointer; /* 添加手型光标以指示整个区域可点击 */
+}
+
+.menu-wrapper {
+  position: relative;
+}
+
+/* 隐藏默认情况下的三点按钮 */
+.menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #ddd;
+}
+
+/* 鼠标悬停时显示三点按钮 */
+.chapter-item:hover .menu-button {
+  display: block;
+}
+
+.menu-button:hover {
+  color: #ffffff; /* 鼠标悬停时按钮颜色 */
+}
+
+/* 菜单下拉样式 */
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.menu-dropdown button {
+  display: block;
+  width: 100px;
+  padding: 8px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-dropdown button.delete {
+  color: red;
+}
+
+.menu-dropdown button:hover {
+  background-color: #f0f0f0;
 }
 
 

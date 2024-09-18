@@ -1,7 +1,12 @@
 package com.group10.gamestoryforge.service;
 
+import com.group10.gamestoryforge.dao.GameRepository;
 import com.group10.gamestoryforge.model.Chapter;
 import com.group10.gamestoryforge.dao.ChapterRepository;
+import com.group10.gamestoryforge.dao.CharacterRepository;
+import com.group10.gamestoryforge.model.Character;
+import com.group10.gamestoryforge.model.Game;
+import com.group10.gamestoryforge.model.UserData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +20,11 @@ public class ChapterService {
     @Autowired
     private ChapterRepository chapterRepository;
 
+    @Autowired
+    private GameRepository gameRepository;
+
+    @Autowired
+    private CharacterRepository characterRepository;
     public List<Chapter> getAllChapters() {
         return chapterRepository.findAll();
     }
@@ -22,19 +32,57 @@ public class ChapterService {
     public Optional<Chapter> getChapterById(Integer id) {
         return chapterRepository.findById(id);
     }
-    public List<Chapter> getChaptersByGameId(Integer gameId) {
-        System.out.println("gameId: " + chapterRepository.findByGameId(gameId));
-        return chapterRepository.findByGameId(gameId);
+
+    public List<Chapter> getChaptersByGameId(Long gameId) {
+        // Fetch the Game entity based on the gameId
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Game not found with id: " + gameId));
+
+        // Use the Game entity to find all chapters related to this game
+        List<Chapter> chapters = chapterRepository.findByGame(game);
+        System.out.println("Chapters for game ID " + gameId + ": " + chapters);
+        return chapters;
     }
-    public Chapter createChapter(Chapter chapter) {
-        return chapterRepository.save(chapter);
+    public void addCharacterToChapter(Integer chapterId, Integer characterId) {
+
+        Chapter chapter = chapterRepository.findById(chapterId).orElseThrow();
+        Character character = characterRepository.findById(characterId).orElseThrow();
+
+        // 将角色添加到章节
+        chapter.getCharacters().add(character);
+        chapterRepository.save(chapter);
+    }
+
+    public List<Character> getCharactersByChapterId(Integer chapterId) {
+        return characterRepository.findByChapters_ChapterId(chapterId);
+    }
+
+    public void removeCharacterFromChapter(Integer chapterId, Integer characterId) {
+        Chapter chapter = chapterRepository.findById(chapterId).orElseThrow();
+        Character character = characterRepository.findById(characterId).orElseThrow();
+
+        // 将角色从章节中移除
+        chapter.getCharacters().remove(character);
+        chapterRepository.save(chapter);
+    }
+
+    public Chapter createChapterForGame(Long gameId, Chapter chapterDetails) {
+        // 根据 gameId 查找 Game 对象
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Game not found with id: " + gameId));
+
+        // 关联 Game 到 Chapter
+        chapterDetails.setGame(game);
+        chapterDetails.setCreatedAt(LocalDateTime.now());
+
+        // 保存并返回 Chapter 对象
+        return chapterRepository.save(chapterDetails);
     }
 
     public Chapter updateChapter(Integer id, Chapter chapterDetails) {
         Chapter chapter = chapterRepository.findById(id).orElseThrow();
         chapter.setName(chapterDetails.getName());
         chapter.setDescription(chapterDetails.getDescription());
-        chapter.setGameId(chapterDetails.getGameId());
         chapter.setUserText(chapterDetails.getUserText());
         chapter.setSystemText(chapterDetails.getSystemText());
         chapter.setUpdatedAt(LocalDateTime.now());

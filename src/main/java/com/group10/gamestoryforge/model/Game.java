@@ -1,8 +1,11 @@
 package com.group10.gamestoryforge.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "games")
@@ -11,7 +14,7 @@ public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "game_id")
-    private Long gameId;
+    private Integer gameId;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -27,7 +30,9 @@ public class Game {
     @JsonBackReference
     private UserData user;
 
-
+    @OneToMany(mappedBy = "game", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<Chapter> chapters = new HashSet<>(); // 级联删除游戏时自动删除关联章节
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -37,11 +42,11 @@ public class Game {
 
     // Getters and Setters
 
-    public Long getGameId() {
+    public Integer getGameId() {
         return gameId;
     }
 
-    public void setGameId(Long gameId) {
+    public void setGameId(Integer gameId) {
         this.gameId = gameId;
     }
 
