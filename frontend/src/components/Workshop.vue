@@ -57,8 +57,8 @@
             </button>
             <!-- 弹出菜单 -->
             <div v-if="chapter.showMenu" class="menu-dropdown">
-              <button @click="renameChapter(chapter)">Rename</button>
-              <button @click="deleteChapter(chapter.chapterId)" class="delete">Delete</button>
+              <button @click="openRenameModal(chapter)">Rename</button>
+              <button class="delete" @click="openDeleteModal(chapter)">Delete</button>
             </div>
           </div>
           </li>
@@ -88,7 +88,7 @@
               <h3>Character Select</h3>
                 <section class="character-select">
                   <div v-if="selectedCharacters.length === 0" class="no-characters">
-                    There is no character selected.
+
                   </div>
                   <div v-else v-for="character in selectedCharacters" :key="character.characterId" class="character-box">
                     <div class="character-select-card">
@@ -203,6 +203,41 @@
         </section>
       </div>
     </div>
+
+    <!-- Rename Chapter Modal -->
+    <div v-if="isRenameModalVisible" class="modal-overlay">
+      <div class="modal-content">
+        <header class="modal-header">
+          <h2>Rename Chapter</h2>
+        </header>
+        <section class="modal-body">
+          <form @submit.prevent="confirmRename">
+            <label for="new-chapter-name">New Chapter Name:</label>
+            <input id="new-chapter-name" v-model="newChapterName" required/>
+            <div class="modal-footer">
+              <button type="submit">Rename</button>
+              <button @click="closeRenameModal" type="button">Cancel</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- Delete Chapter Confirmation Modal -->
+    <div v-if="isDeleteModalVisible" class="modal-overlay">
+      <div class="modal-content">
+        <header class="modal-header">
+          <h2>Confirm Delete</h2>
+        </header>
+        <section class="modal-body">
+          <p>Are you sure you want to delete this chapter?</p>
+          <div class="modal-footer">
+            <button @click="confirmDelete" type="button">Delete</button>
+            <button @click="closeDeleteModal" type="button">Cancel</button>
+          </div>
+        </section>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -231,6 +266,10 @@ export default {
       isEditModalVisible: false,
       editableCharacter: null, // The character being edited
       imageUrl: null,
+      isRenameModalVisible: false,
+      isDeleteModalVisible: false,
+      chapterToEdit: null,
+      chapterToDelete: null,
     };
   },
   async mounted() {
@@ -297,32 +336,53 @@ export default {
       }
     },
 
-    renameChapter(chapter) {
-      const newName = prompt('Enter new chapter name:', chapter.name);
-      if (newName && newName.trim() !== '') {
-        axios.put(`/api/chapters/${chapter.chapterId}`, { name: newName.trim() })
-            .then(response => {
-              chapter.name = response.data.name; // 更新本地章节名称
-              this.closeAllMenus();
-            })
-            .catch(error => {
-              console.error('Error renaming chapter:', error);
-            });
+    openRenameModal(chapter) {
+      this.chapterToEdit = chapter;
+      this.newChapterName = chapter.name;
+      this.isRenameModalVisible = true;
+    },
+    closeRenameModal() {
+      this.isRenameModalVisible = false;
+      this.chapterToEdit = null;
+      this.newChapterName = '';
+    },
+    async confirmRename() {
+      if (this.newChapterName.trim() !== '') {
+        try {
+          const response = await axios.put(`/api/chapters/${this.chapterToEdit.chapterId}`, { name: this.newChapterName.trim() });
+          this.chapterToEdit.name = response.data.name;
+          this.closeRenameModal();
+        } catch (error) {
+          console.error('Error renaming chapter:', error);
+        }
       }
     },
 
-    // 删除章节
-    deleteChapter(chapterId) {
-      if (confirm('Are you sure you want to delete this chapter?')) {
-        // 发送 DELETE 请求删除章节
-        axios.delete(`/api/chapters/${chapterId}`)
-            .then(() => {
-              this.chapters = this.chapters.filter(chapter => chapter.chapterId !== chapterId);
-              this.closeAllMenus();
-            })
-            .catch(error => {
-              console.error('Error deleting chapter:', error);
-            });
+    openDeleteModal(chapter) {
+      this.chapterToDelete = chapter;
+      this.isDeleteModalVisible = true;
+    },
+    closeDeleteModal() {
+      this.isDeleteModalVisible = false;
+      this.chapterToDelete = null;
+    },
+    async confirmDelete() {
+      try {
+        const chapterIdToDelete = this.chapterToDelete.chapterId;
+        await axios.delete(`/api/chapters/${chapterIdToDelete}`);
+        const indexToDelete = this.chapters.findIndex(chapter => chapter.chapterId === chapterIdToDelete);
+        this.chapters = this.chapters.filter(chapter => chapter.chapterId !== chapterIdToDelete);
+        this.closeDeleteModal();
+
+        if (this.chapters.length > 0) {
+          if (indexToDelete > 0) {
+            this.selectChapter(this.chapters[indexToDelete - 1]);
+          } else {
+            this.selectChapter(this.chapters[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error deleting chapter:', error);
       }
     },
     async selectChapter(chapter) {
@@ -710,8 +770,8 @@ export default {
   position: absolute;
   right: 0;
   top: 100%;
-  background-color: white;
-  border: 1px solid #ddd;
+  background-color: #3f3f46;
+  border: 1px solid #515157;
   border-radius: 4px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
@@ -725,14 +785,15 @@ export default {
   border: none;
   text-align: left;
   cursor: pointer;
+  color: rgba(215, 215, 215, 0.88);
 }
 
 .menu-dropdown button.delete {
-  color: red;
+  color: #e10808;
 }
 
 .menu-dropdown button:hover {
-  background-color: #f0f0f0;
+  background-color: #505056;
 }
 
 
@@ -1257,8 +1318,18 @@ html, body {
 
 }
 
+#new-chapter-name {
+  width: 50%; /* Set the width to 100% of the parent container */
+  padding: 10px; /* Add padding for better spacing */
+  margin-bottom: 10px; /* Add margin at the bottom for spacing */
+  border: 2px solid #A4A4A4; /* Set the border color and width */
+  border-radius: 8px; /* Add rounded corners */
+  background-color: #3E404A; /* Set the background color */
+  color: #D2D2D2; /* Set the text color */
+  font-family: 'Lora', serif; /* Set the font family */
+  box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+}
 
-/* width */
 
 
 </style>
