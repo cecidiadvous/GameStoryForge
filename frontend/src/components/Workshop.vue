@@ -131,6 +131,9 @@
           <section class="storyline-box">
             <textarea v-model="storylineDescription" ></textarea>
           </section>
+          <section class="dialogue-box">
+            <textarea v-model="dialogueDescription" placeholder="Enter the dialogue here"></textarea>
+          </section>
         </main>
       </div>
     </div>
@@ -195,6 +198,7 @@
               <label for="character-background">Background:</label>
               <textarea id="character-background" v-model="editableCharacter.background"></textarea>
             </div>
+
             <div class="modal-footer">
               <button type="submit">Save</button>
               <button @click="closeEditModal" type="button">Cancel</button>
@@ -270,6 +274,8 @@ export default {
       isDeleteModalVisible: false,
       chapterToEdit: null,
       chapterToDelete: null,
+      storylineDescription: '',
+      dialogueDescription: '',
     };
   },
   async mounted() {
@@ -554,6 +560,36 @@ export default {
         console.error('Error removing character from chapter:', error);
       }
     },
+
+    async createStory() {
+      if (!this.selectedChapter || !this.selectedChapter.chapterId) {
+        console.error('No chapter selected');
+        return;
+      }
+
+      const payload = {
+        chapterId: this.selectedChapter.chapterId,
+        storyDescription: this.storyDescription
+      };
+
+      try {
+        const response = await axios.post('/api/stories/create', payload);
+        console.log('Story created:', response.data);
+
+        // Parse the JSON response to extract the storyline
+        const storyline = response.data.storyline;
+        const dialogueArray = response.data.dialogue;
+
+        const dialogue = dialogueArray.map(item => `${item.character}: ${item.text}`).join('\n');
+
+        this.storylineDescription = storyline; // Update the storylineDescription
+        this.dialogueDescription = dialogue;
+
+      } catch (error) {
+        console.error('Error creating story:', error);
+      }
+    },
+
   },
 
 
@@ -1120,6 +1156,8 @@ html, body {
   margin: 10px auto;
   height: 300px;
   margin-top: 10px;
+  margin-bottom: 70px;
+
 }
 
 
@@ -1135,6 +1173,10 @@ html, body {
   font-weight: normal;
   font-family: Lora, serif;
   font-size: 16px;
+
+  scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
+  scrollbar-width: thin; /* 可以为 auto, thin 或 none */
+
 }
 
 .storyline-box textarea::placeholder {
@@ -1329,7 +1371,35 @@ html, body {
   font-family: 'Lora', serif; /* Set the font family */
   box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
 }
+.dialogue-box {
+  display: flex;
+  gap: 30px; /* Space between the two sections */
+  width: 900px;
+  margin: 10px auto;
+  height: 300px;
+  margin-top: 10px;
+  margin-bottom: 60px;
+}
 
+.dialogue-box textarea {
+  width: 860px;
+  height: 300px;
+  background-color: rgba(62, 64, 74, 0.95);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 20px;
+  resize: none;
+  font-weight: normal;
+  font-family: Lora, serif;
+  font-size: 16px;
+  scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
+  scrollbar-width: thin; /* 可以为 auto, thin 或 none */
+}
+
+.dialogue-box textarea::placeholder {
+  color: #bbb;
+}
 
 
 </style>

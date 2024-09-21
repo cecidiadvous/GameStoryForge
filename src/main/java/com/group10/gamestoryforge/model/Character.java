@@ -109,6 +109,18 @@ public class Character {
     public void setChapters(Set<Chapter> chapters) {
         this.chapters = chapters;
     }
+
+    // 写出 toString 方法
+    @Override
+    public String toString() {
+        return "Character{" +
+                ", name='" + name + '\'' +
+                ", role='" + role + '\'' +
+                ", background='" + background + '\'' +
+                ", ability='" + ability + '\'' +
+                '}';
+    }
+
     @PreRemove
     public void deleteImage() {
         if (image != null) {
