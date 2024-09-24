@@ -130,6 +130,27 @@
 
           <section class="storyline-box">
             <textarea v-model="storylineDescription" ></textarea>
+            <div class="dropdown">
+              <button class="dropdown-button" @click="toggleDropdown">
+                {{ selectedLanguageName }} ▼
+              </button>
+              <ul v-if="dropdownOpen" class="dropdown-menu">
+                <li @click="selectLanguage('en', 'English')">English</li>
+                <li @click="selectLanguage('es', 'Spanish')">Spanish</li>
+                <li @click="selectLanguage('fr', 'French')">French</li>
+                <li @click="selectLanguage('de', 'German')">German</li>
+                <li @click="selectLanguage('zh', 'Chinese (Simplified)')">Chinese (Simplified)</li>
+                <li @click="selectLanguage('zh-TW', 'Chinese (Traditional)')">Chinese (Traditional)</li>
+                <li @click="selectLanguage('ja', 'Japanese')">Japanese</li>
+                <li @click="selectLanguage('ko', 'Korean')">Korean</li>
+                <li @click="selectLanguage('ru', 'Russian')">Russian</li>
+                <li @click="selectLanguage('pt', 'Portuguese')">Portuguese</li>
+                <li @click="selectLanguage('it', 'Italian')">Italian</li>
+                <li @click="selectLanguage('ar', 'Arabic')">Arabic</li>
+                <li @click="selectLanguage('hi', 'Hindi')">Hindi</li>
+                <!-- More languages can be added here -->
+              </ul>
+            </div>
           </section>
           <section class="dialogue-box">
             <textarea v-model="dialogueDescription" placeholder="Enter the dialogue here"></textarea>
@@ -276,6 +297,9 @@ export default {
       chapterToDelete: null,
       storylineDescription: '',
       dialogueDescription: '',
+      selectedLanguage: 'zh',    // 默认选中的目标语言代码
+      selectedLanguageName: 'Chinese (Simplified)',  // 默认显示的语言名
+      dropdownOpen: false        // 控制下拉菜单的显示与隐藏
     };
   },
   async mounted() {
@@ -590,6 +614,49 @@ export default {
       }
     },
 
+    toggleDropdown() {
+      this.dropdownOpen = !this.dropdownOpen;
+    },
+    
+    // 选择语言时更新选中的语言
+    async selectLanguage(code, name) {
+      this.selectedLanguage = code;
+      this.selectedLanguageName = name;
+      this.dropdownOpen = false;  // 关闭下拉菜单
+
+      await this.translateContent();
+    },
+
+    async translateContent() {
+      try {
+        // 翻译并替换故事描述
+        this.storylineDescription = await this.translateText(this.storylineDescription, this.selectedLanguage);
+
+        // 翻译并替换对话描述
+        this.dialogueDescription = await this.translateText(this.dialogueDescription, this.selectedLanguage);
+
+      } catch (error) {
+        console.error('Translation failed:', error);
+      }
+    },
+    
+    // 调用Google Translate API翻译文本
+    async translateText(text, targetLanguage) {
+      const API_KEY = 'AIzaSyCPa0d4nRmeZsI7vpFHANj_5SU7wfteEu8'; 
+      const URL = `https://translation.googleapis.com/language/translate/v2?key=${API_KEY}`;
+
+      try {
+        const response = await axios.post(URL, {
+          q: text,  // 要翻译的文本
+          target: targetLanguage // 目标语言
+        });
+        return response.data.data.translations[0].translatedText; // 返回翻译后的文本
+      } catch (error) {
+        console.error('Error translating text:', error);
+        throw error;
+      }
+    }
+
   },
 
 
@@ -867,7 +934,7 @@ html, body {
   background-color: #f4f4f4;
   border-radius: 12px;
   margin: 0 8px 8px 0;
-  //background: url('http://localhost:8080/uploads/images/51c43978-71e3-4b5f-a2d4-21f772de4f02_Screenshot 2024-08-24 095635.png');
+  background: url('http://localhost:8080/uploads/images/51c43978-71e3-4b5f-a2d4-21f772de4f02_Screenshot 2024-08-24 095635.png');
   background-size: cover;
 }
 
@@ -1157,7 +1224,7 @@ html, body {
   height: 300px;
   margin-top: 10px;
   margin-bottom: 70px;
-
+  position: relative;
 }
 
 
@@ -1177,10 +1244,68 @@ html, body {
   scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
   scrollbar-width: thin; /* 可以为 auto, thin 或 none */
 
+  /* padding-top: 50px; */
+
 }
 
 .storyline-box textarea::placeholder {
   color: #bbb;
+}
+
+.dropdown {
+  position: absolute;
+  top: 10px;
+  right: 10px; /* Adjust right position to ensure button fits inside box */
+}
+
+.dropdown-button {
+  padding: 10px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-button:hover {
+  background-color: #45a049;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 40px; /* Adjust to display below the button */
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  list-style-type: none;
+  padding: 10px 0;
+  margin: 0;
+  width: 180px; /* Define a width for better alignment */
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+.dropdown-menu li {
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #333;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dropdown-menu li:hover {
+  background-color: #f0f0f0;
+  color: #4CAF50;
+}
+
+.dropdown-menu li:not(:last-child) {
+  border-bottom: 1px solid #ddd;
 }
 
 .scrollable-container {
@@ -1400,7 +1525,5 @@ html, body {
 .dialogue-box textarea::placeholder {
   color: #bbb;
 }
-
-
 </style>
   
