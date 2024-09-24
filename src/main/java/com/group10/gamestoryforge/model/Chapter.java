@@ -1,7 +1,11 @@
 package com.group10.gamestoryforge.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "chapters")
@@ -17,8 +21,7 @@ public class Chapter {
 
     private String description;
 
-    @Column(name = "game_id", nullable = false)
-    private Integer gameId;
+
 
     @Column(name = "user_text")
     private String userText;
@@ -32,8 +35,23 @@ public class Chapter {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "game_id", nullable = false)  // 外键指向游戏
+    @JsonBackReference
+    private Game game;  // 与Game的关系
+
+    @ManyToMany
+    @JoinTable(
+            name = "chapter_character",
+            joinColumns = @JoinColumn(name = "chapter_id"),
+            inverseJoinColumns = @JoinColumn(name = "character_id")
+    )
+
+    private Set<Character> characters = new HashSet<>();
+
+
+
     public Chapter() {
-        // Initialize createdAt with the current time
         this.createdAt = LocalDateTime.now();
     }
 
@@ -62,13 +80,6 @@ public class Chapter {
         this.description = description;
     }
 
-    public Integer getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Integer gameId) {
-        this.gameId = gameId;
-    }
 
     public String getUserText() {
         return userText;
@@ -100,5 +111,21 @@ public class Chapter {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
+
+    public Set<Character> getCharacters() {
+        return characters;
+    }
+
+    public void setCharacters(Set<Character> characters) {
+        this.characters = characters;
     }
 }

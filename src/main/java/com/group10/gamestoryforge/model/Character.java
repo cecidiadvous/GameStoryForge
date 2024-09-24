@@ -1,6 +1,15 @@
 package com.group10.gamestoryforge.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "characters")
@@ -25,6 +34,13 @@ public class Character {
 
     @Column(name = "game_id", nullable = false)
     private Integer gameId;
+
+    @Column(name = "image")
+    private String image;
+
+    @ManyToMany(mappedBy = "characters")
+    @JsonIgnore  // 防止递归序列化
+    private Set<Chapter> chapters = new HashSet<>();
 
     public Character() {
     }
@@ -76,5 +92,46 @@ public class Character {
 
     public void setGameId(Integer gameId) {
         this.gameId = gameId;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public Set<Chapter> getChapters() {
+        return chapters;
+    }
+
+    public void setChapters(Set<Chapter> chapters) {
+        this.chapters = chapters;
+    }
+
+    // 写出 toString 方法
+    @Override
+    public String toString() {
+        return "Character{" +
+                ", name='" + name + '\'' +
+                ", role='" + role + '\'' +
+                ", background='" + background + '\'' +
+                ", ability='" + ability + '\'' +
+                '}';
+    }
+
+    @PreRemove
+    public void deleteImage() {
+        if (image != null) {
+
+            Path pathToDelete = Paths.get(System.getProperty("user.dir") + image);
+            System.out.println("Deleting file at: " + pathToDelete.toString());
+            try {
+                Files.deleteIfExists(pathToDelete);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to delete image: " + image, e);
+            }
+        }
     }
 }

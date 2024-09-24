@@ -30,7 +30,6 @@ public class GameController {
             @RequestParam("description") String description,
             @RequestParam(value = "image", required = false) MultipartFile image) {
 
-        // 保存图片文件
         String imagePath = null;
         if (image != null && !image.isEmpty()) {
             imagePath = gameService.saveGameImage(image); // 保存图片并返回路径

@@ -81,7 +81,11 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jsonSchema</artifactId>
+            <version>2.12.3</version> <!-- 根据你项目中的 Jackson 版本选择适当的版本 -->
+        </dependency>
         <!-- PostgreSQL JDBC 驱动 -->
         <dependency>
             <groupId>org.postgresql</groupId>

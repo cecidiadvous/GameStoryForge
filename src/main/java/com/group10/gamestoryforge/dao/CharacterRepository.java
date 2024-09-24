@@ -8,5 +8,6 @@ import java.util.List;
 @Repository
 public interface CharacterRepository extends JpaRepository<Character, Integer> {
     List<Character> findByGameId(Integer gameId);
+    List<Character> findByChapters_ChapterId(Integer chapterId);
 }
 
