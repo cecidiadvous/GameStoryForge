@@ -100,7 +100,7 @@
             </div>
               <div class="story-box-wrapper">
               <section class="story-box">
-                <textarea v-model="storyDescription" placeholder="Describe the style and story of the game"></textarea>
+                <textarea v-model="storyDescription" class="story-textarea" placeholder="Describe the style and story of the game"></textarea>
                 <img src="@/assets/create_button3.svg" @click="createStory" class="create-button" alt="Create Story"/>
               </section>
               </div>
@@ -129,6 +129,8 @@
           </div>
 
           <section class="storyline-box">
+            <div class="storyline-box-wrapper">
+              <h3>Storyline</h3>
             <textarea v-model="storylineDescription" ></textarea>
             <div class="dropdown">
               <button class="dropdown-button" @click="toggleDropdown">
@@ -151,10 +153,14 @@
                 <!-- More languages can be added here -->
               </ul>
             </div>
+            </div>
           </section>
+          <div class="dialogue-box-wrapper">
+            <h3>Character Dialogue</h3>
           <section class="dialogue-box">
             <textarea v-model="dialogueDescription" placeholder="Enter the dialogue here"></textarea>
           </section>
+          </div>
         </main>
       </div>
     </div>
@@ -289,7 +295,7 @@ export default {
       storyDescription: '',
       showInstructions: false,
       isEditModalVisible: false,
-      editableCharacter: null, // The character being edited
+      editableCharacter: null,
       imageUrl: null,
       isRenameModalVisible: false,
       isDeleteModalVisible: false,
@@ -297,9 +303,11 @@ export default {
       chapterToDelete: null,
       storylineDescription: '',
       dialogueDescription: '',
-      selectedLanguage: 'zh',    // 默认选中的目标语言代码
-      selectedLanguageName: 'Chinese (Simplified)',  // 默认显示的语言名
-      dropdownOpen: false        // 控制下拉菜单的显示与隐藏
+      originalStorylineDescription: '', // 新增变量保存原始故事描述
+      originalDialogueDescription: '', // 新增变量保存原始对话描述
+      selectedLanguage: 'zh',
+      selectedLanguageName: 'Chinese (Simplified)',
+      dropdownOpen: false
     };
   },
   async mounted() {
@@ -606,7 +614,12 @@ export default {
 
         const dialogue = dialogueArray.map(item => `${item.character}: ${item.text}`).join('\n');
 
-        this.storylineDescription = storyline; // Update the storylineDescription
+        // 保存原始语言版本
+        this.originalStorylineDescription = storyline;
+        this.originalDialogueDescription = dialogue;
+
+        // 更新当前显示的描述
+        this.storylineDescription = storyline;
         this.dialogueDescription = dialogue;
 
       } catch (error) {
@@ -622,7 +635,7 @@ export default {
     async selectLanguage(code, name) {
       this.selectedLanguage = code;
       this.selectedLanguageName = name;
-      this.dropdownOpen = false;  // 关闭下拉菜单
+      this.dropdownOpen = false;
 
       await this.translateContent();
     },
@@ -630,10 +643,10 @@ export default {
     async translateContent() {
       try {
         // 翻译并替换故事描述
-        this.storylineDescription = await this.translateText(this.storylineDescription, this.selectedLanguage);
+        this.storylineDescription = await this.translateText(this.originalStorylineDescription, this.selectedLanguage);
 
         // 翻译并替换对话描述
-        this.dialogueDescription = await this.translateText(this.dialogueDescription, this.selectedLanguage);
+        this.dialogueDescription = await this.translateText(this.originalDialogueDescription, this.selectedLanguage);
 
       } catch (error) {
         console.error('Translation failed:', error);
@@ -642,15 +655,15 @@ export default {
     
     // 调用Google Translate API翻译文本
     async translateText(text, targetLanguage) {
-      const API_KEY = 'AIzaSyCPa0d4nRmeZsI7vpFHANj_5SU7wfteEu8'; 
+      const API_KEY = 'AIzaSyCPa0d4nRmeZsI7vpFHANj_5SU7wfteEu8';
       const URL = `https://translation.googleapis.com/language/translate/v2?key=${API_KEY}`;
 
       try {
         const response = await axios.post(URL, {
-          q: text,  // 要翻译的文本
-          target: targetLanguage // 目标语言
+          q: text,
+          target: targetLanguage
         });
-        return response.data.data.translations[0].translatedText; // 返回翻译后的文本
+        return response.data.data.translations[0].translatedText;
       } catch (error) {
         console.error('Error translating text:', error);
         throw error;
@@ -1026,6 +1039,7 @@ html, body {
   gap: 30px; /* Space between the two sections */
   width: 900px;
   margin: 0 auto;
+  margin-bottom: -5px;
 }
 
 .left-column {
@@ -1202,6 +1216,11 @@ html, body {
   border: none; /* Remove any border */
 }
 
+.story-textarea::placeholder {
+  color: #aaa; /* 设置占位符为浅灰色 */
+  opacity: 1; /* 可选：设置占位符的不透明度，默认为0.5 */
+}
+
 
 .create-button {
   margin-top: 1px;
@@ -1214,6 +1233,23 @@ html, body {
 
 .create-button:hover {
   filter: brightness(1.2); /* Add a hover effect */
+}
+
+.storyline-box-wrapper {
+  background-color: rgba(62, 64, 74, 0.95); /* Adjust the border color and width as needed */
+  border-radius: 12px; /* Optional: Add border radius */
+  width: 900px;
+  padding: 0;
+  height: 370px;
+  margin: 0px auto;
+  margin-bottom: 60px;
+}
+
+.storyline-box-wrapper h3 {
+  margin-bottom: 15px;
+  margin-top: 10px;
+  font-weight: normal;
+  font-family: Lora, serif;
 }
 
 .storyline-box {
@@ -1231,11 +1267,11 @@ html, body {
 .storyline-box textarea {
   width: 860px;
   height: 300px;
-  background-color: rgba(62, 64, 74, 0.95);
+  background-color: rgba(62, 64, 74, 0);
   color: #fff;
   border: none;
   border-radius: 12px;
-  padding: 20px;
+  padding: 0px 20px 0px 20px;
   resize: none;
   font-weight: normal;
   font-family: Lora, serif;
@@ -1260,19 +1296,20 @@ html, body {
 
 .dropdown-button {
   padding: 10px 15px;
-  background-color: #4CAF50;
+  background-color: #4c5caf;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   outline: none;
   font-size: 14px;
-  font-weight: bold;
   transition: background-color 0.3s ease;
+  font-weight: normal;
+  font-family: Lora, serif;
 }
 
 .dropdown-button:hover {
-  background-color: #45a049;
+  background-color: #4557a0;
 }
 
 .dropdown-menu {
@@ -1496,24 +1533,41 @@ html, body {
   font-family: 'Lora', serif; /* Set the font family */
   box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
 }
+
+.dialogue-box-wrapper {
+  background-color: rgba(62, 64, 74, 0.95); /* Adjust the border color and width as needed */
+  border-radius: 12px; /* Optional: Add border radius */
+  width: 900px;
+  padding: 0;
+  height: 340px;
+  margin: 10px auto;
+  margin-bottom: 20px;
+  margin-top: 35px;
+}
+
+.dialogue-box-wrapper h3 {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  font-weight: normal;
+  font-family: Lora, serif;
+}
+
 .dialogue-box {
   display: flex;
-  gap: 30px; /* Space between the two sections */
   width: 900px;
   margin: 10px auto;
   height: 300px;
   margin-top: 10px;
-  margin-bottom: 60px;
 }
 
 .dialogue-box textarea {
   width: 860px;
-  height: 300px;
-  background-color: rgba(62, 64, 74, 0.95);
+  height: 260px;
+  background-color: rgba(62, 64, 74, 0);
   color: #fff;
   border: none;
   border-radius: 12px;
-  padding: 20px;
+  padding: 0px 20px 20px 20px;
   resize: none;
   font-weight: normal;
   font-family: Lora, serif;

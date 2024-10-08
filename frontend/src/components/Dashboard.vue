@@ -288,7 +288,6 @@ export default {
 }
 
 .game-card {
-  flex-basis: calc(33.33% - 20px); /* 每行显示 3 个卡片，减去间距 */
   width: 250px;  /* 固定宽度 */
   height: 250px; /* 固定高度 */
   background-color: #3f3f48;
