@@ -35,7 +35,8 @@ public class ChatService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
 
-        String model = "\"model\": \"gpt-4o-mini\"";
+        String model = "\"model\": \"gpt-4o\"";
+        int  max_tokens = 2000;
 
         // 动态生成消息列表My Workspace
         //
@@ -95,6 +96,7 @@ public class ChatService {
             String requestBody = "{"
                     + model + ","
                     + messages + ","
+                    + "\"max_tokens\": " + max_tokens + ","
                     + responseFormat
                     + "}";
 

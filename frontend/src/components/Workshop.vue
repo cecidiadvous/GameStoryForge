@@ -35,6 +35,7 @@
       </div>
       <div class="chapter-list-container">
         <h3>{{ projectTitle }}</h3>
+        <h3>Chapter List:</h3>
         <ul>
           <li
               v-for="chapter in chapters"
@@ -42,7 +43,6 @@
               :class="{ selected: chapter.chapterId === selectedChapter?.chapterId }"
               class="chapter-item"
               @click="selectChapter(chapter)" >
-
 
           <span>
           {{ chapter.name }}
@@ -158,22 +158,21 @@
           <div class="dialogue-box-wrapper">
             <h3>Character Dialogue</h3>
           <section class="dialogue-box">
-            <textarea v-model="dialogueDescription" placeholder="Enter the dialogue here"></textarea>
+            <textarea v-model="dialogueDescription" placeholder=""></textarea>
           </section>
           </div>
         </main>
       </div>
     </div>
 
-    <!-- Modal for Editing Character -->
+
     <div v-if="showInstructions" class="modal-overlay">
       <div class="modal-content">
-        <button @click="toggleInstructions" class="close-modal">Close</button>
+        <button @click="toggleInstructions" class="close-modal">X</button>
         <section class="instructions">
           <h3>Instruction</h3>
           <p>1. Select a Chapter: Use the left sidebar to choose or add a chapter.</p>
-          <p>2. Select Characters: Drag characters from "Character Select" to the "Character List" to include them in
-            the story.</p>
+          <p>2. Select Characters: Drag characters from "Character Select" to the "Character List" to include them in the story.</p>
           <p>3. Customize Characters: Click on a character in the "Character List".</p>
           <p>4. Write the Draft: Use the "Describe the style and story of the game" box to draft.</p>
           <p>5. Generate Story Dialogue.</p>
@@ -346,6 +345,7 @@ export default {
         console.error('Error fetching chapters:', error);
       }
     },
+
     async addChapter() {
       const newChapter = {
         name: this.newChapterName,
@@ -423,6 +423,7 @@ export default {
         console.error('Error deleting chapter:', error);
       }
     },
+
     async selectChapter(chapter) {
       this.selectedChapter = chapter; // 设置当前选中的章节
 
@@ -433,8 +434,49 @@ export default {
         // 更新 selectedCharacters 列表
         this.selectedCharacters = response.data;
 
+        // Fetch the previously created story for the selected chapter
+        await this.fetchPreviousStory(chapter.chapterId);
+
       } catch (error) {
-        console.error('Error fetching characters for chapter:', error);
+        console.error('Error fetching characters or previous story for chapter:', error);
+      }
+    },
+
+    async fetchPreviousStory(chapterId) {
+      try {
+        const response = await axios.get(`/api/stories/${chapterId}`);
+        console.log('Previous story fetched:', response.data);
+
+        // Check if the response data is empty or null
+        if (!response.data || !response.data.storyline || !response.data.dialogue) {
+          this.originalStorylineDescription = '';
+          this.originalDialogueDescription = '';
+          this.storylineDescription = '';
+          this.dialogueDescription = '';
+          return;
+        }
+
+        // Parse the JSON response to extract the storyline and dialogue
+        const storyline = response.data.storyline;
+        const dialogueArray = response.data.dialogue;
+
+        const dialogue = dialogueArray.map(item => `${item.character}: ${item.text}`).join('\n');
+
+        // 保存原始语言版本
+        this.originalStorylineDescription = storyline;
+        this.originalDialogueDescription = dialogue;
+
+        // 更新当前显示的描述
+        this.storylineDescription = storyline;
+        this.dialogueDescription = dialogue;
+
+      } catch (error) {
+        console.error('Error fetching previous story:', error);
+        // Set to empty values in case of error
+        this.originalStorylineDescription = '';
+        this.originalDialogueDescription = '';
+        this.storylineDescription = '';
+        this.dialogueDescription = '';
       }
     },
 
@@ -773,6 +815,7 @@ export default {
   font-size: 20px;
 }
 
+
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -977,6 +1020,19 @@ html, body {
   cursor: pointer;
   font-weight: normal;
   font-family: Lora, serif;
+}
+
+.close-modal {
+  padding-left: 395px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  color: #ccc;
 }
 
 .instructions-button:hover {
@@ -1210,7 +1266,7 @@ html, body {
   scrollbar-width: thin; /* 可以为 auto, thin 或 none */
 }
 
-.story-box textarea:focus {
+.story-box textarea,.storyline-box textarea, .dialogue-box textarea:focus {
   outline: none; /* Remove the default focus outline */
   /* Optionally, add custom focus styles */
   border: none; /* Remove any border */
@@ -1276,12 +1332,8 @@ html, body {
   font-weight: normal;
   font-family: Lora, serif;
   font-size: 16px;
-
   scrollbar-color: #989898 #2c2c2c; /* 滑块颜色 滚动条轨道颜色 */
   scrollbar-width: thin; /* 可以为 auto, thin 或 none */
-
-  /* padding-top: 50px; */
-
 }
 
 .storyline-box textarea::placeholder {
@@ -1356,10 +1408,6 @@ html, body {
   width: 20px;
 }
 
-/* Track */
-
-
-
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1376,7 +1424,7 @@ html, body {
 
 .modal-content {
   background: #3f3f48;
-  padding: 20px;
+  padding: 10px 20px 20px 20px;
   border-radius: 8px;
   width: 400px;
   font-family: 'Lora', serif;
@@ -1517,9 +1565,8 @@ html, body {
 }
 
 .instructions h3 {
-  margin-top: 10px;
+  margin-top: 0px;
   text-align: center;
-
 }
 
 #new-chapter-name {

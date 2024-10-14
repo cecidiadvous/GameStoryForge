@@ -19,18 +19,6 @@ public class StoryController {
     @Autowired
     private StoryService storyService;
 
-//    @GetMapping
-//    public String chat(@RequestParam String prompt) {
-//        ChatResponse response = chatService.getChatResponse(prompt);
-//        if (response == null || response.getChoices() == null || response.getChoices().isEmpty()) {
-//            return "No response";
-//        }
-//
-//        String responseText = response.getChoices().get(0).getMessage().getContent();
-//        responseText = responseText.replace("\\n", "");
-//        return responseText;
-//    }
-
     @PostMapping("/create")
     public ResponseEntity<?> createStory(@RequestBody Map<String, Object> payload) {
         int chapterId = Integer.parseInt(payload.get("chapterId").toString());
@@ -39,5 +27,9 @@ public class StoryController {
         return ResponseEntity.ok(responseText);
     }
 
-
+    @GetMapping("/{chapterId}")
+    public ResponseEntity<?> getStory(@PathVariable Integer chapterId) {
+        String responseText = storyService.getStoryByChapterId(chapterId);
+        return ResponseEntity.ok(responseText);
+    }
 }

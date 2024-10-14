@@ -10,6 +10,7 @@ import com.group10.gamestoryforge.model.UserData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
@@ -40,9 +41,16 @@ public class ChapterService {
 
         // Use the Game entity to find all chapters related to this game
         List<Chapter> chapters = chapterRepository.findByGame(game);
-        System.out.println("Chapters for game ID " + gameId + ": " + chapters);
+        chapters.sort(Comparator.comparing(Chapter::getCreatedAt));
+        for (Chapter chapter : chapters) {
+
+            System.out.println("Chapter Name: " + chapter.getName());
+            System.out.println("Chapter Created At: " + chapter.getCreatedAt());
+            System.out.println("-----------------------------");
+        }
         return chapters;
     }
+
     public void addCharacterToChapter(Integer chapterId, Integer characterId) {
 
         Chapter chapter = chapterRepository.findById(chapterId).orElseThrow();
@@ -82,9 +90,6 @@ public class ChapterService {
     public Chapter updateChapter(Integer id, Chapter chapterDetails) {
         Chapter chapter = chapterRepository.findById(id).orElseThrow();
         chapter.setName(chapterDetails.getName());
-        chapter.setDescription(chapterDetails.getDescription());
-        chapter.setUserText(chapterDetails.getUserText());
-        chapter.setSystemText(chapterDetails.getSystemText());
         chapter.setUpdatedAt(LocalDateTime.now());
         return chapterRepository.save(chapter);
     }

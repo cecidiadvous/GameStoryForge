@@ -21,12 +21,10 @@ public class Chapter {
 
     private String description;
 
-
-
-    @Column(name = "user_text")
+    @Column(name = "user_text", columnDefinition = "TEXT")
     private String userText;
 
-    @Column(name = "system_text")
+    @Column(name = "system_text", columnDefinition = "TEXT")
     private String systemText;
 
     @Column(name = "created_at", nullable = false)

@@ -24,8 +24,6 @@ public class ChapterController {
 
     @GetMapping
     public List<Chapter> getChaptersByGameId(@RequestParam Long gameId) {
-
-
         return chapterService.getChaptersByGameId(gameId);
     }
 
