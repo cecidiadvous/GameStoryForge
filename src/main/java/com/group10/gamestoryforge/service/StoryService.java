@@ -1,14 +1,12 @@
 package com.group10.gamestoryforge.service;
 
 import com.group10.gamestoryforge.dao.ChapterRepository;
-import com.group10.gamestoryforge.model.ChatResponse;
+import com.group10.gamestoryforge.model.*;
+import com.group10.gamestoryforge.model.Character;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.group10.gamestoryforge.model.Message;
 import com.group10.gamestoryforge.dao.CharacterRepository;
-import com.group10.gamestoryforge.model.Character;
 import com.group10.gamestoryforge.service.ChatService;
-import com.group10.gamestoryforge.model.Chapter;
 import com.group10.gamestoryforge.dao.ChapterRepository;
 
 import java.util.ArrayList;
@@ -29,6 +27,18 @@ public class StoryService {
 
     public String createStory(Integer chapterId, String storyDescription) {
 
+        List<Chapter> chapters = getChaptersCreatedBefore(chapterId);
+
+        String previousStorylines = "";
+
+        for (Chapter chapter : chapters) {
+            previousStorylines += chapter.getSystemText() + "\n";
+            System.out.println("-----------------------------");
+            System.out.println("SystemText: " + chapter.getSystemText());
+            System.out.println("-----------------------------");
+        }
+
+
         List<Character> characters = characterRepository.findByChapters_ChapterId(chapterId);
 
         // Convert characters list to a string
@@ -37,17 +47,23 @@ public class StoryService {
                 .collect(Collectors.joining(", "));
 
         // Concatenate characters string with storyDescription
-        String fullStoryDescription = storyDescription + " Characters: " + charactersString;
+        String fullStoryDescription = "previously generated dialogues and storyline:"+ previousStorylines  + " Brief game chapter story summary: " + storyDescription + " Characters: " + charactersString;
+
+        System.out.println("fullStoryDescription: " + fullStoryDescription);
+
+
 
 
         List<Message> messagesList = new ArrayList<>();
 
-        messagesList.add(new Message("system", "You are an AI capable of generating detailed game storylines(exclude dialogue) and character dialogues(include dialogue) " +
-                "based on the game characters and general plot that I provide. The storyline should include the game's background, world-building, " +
-                "key events, quests, and character development. I will provide input chapter by chapter, " +
-                "and for each chapter, you will generate around 1500 words of engaging and immersive storyline, written in third-person perspective, " +
-                "with distinctive character personalities. The character dialogues will Reflect the character characteristics. The output language should match " +
-                "the input language provided by the user, and all punctuation should follow English punctuation rules."));
+        messagesList.add(new Message("system",
+                "You are an AI capable of generating detailed game storylines and including character dialogues based on the game characters and brief chapter summaries I provide." +
+                        "The stories should include the game's background, world-building, key events, quests, and character development." +
+                        "In each chapter, you will generate an engaging, immersive third-person narrative of 1,300 to 1,600 words, with characters that have distinctive personalities." +
+                        "The characters' dialogues should be naturally integrated into the story and reflect their traits." +
+                        "The output language should be consistent with the input language provided by the user, and all punctuation should follow the rules of that language." +
+                        "If this is not the first chapter, I will provide the previously generated dialogues and storyline, and you need to maintain the continuity and consistency of the story based on these."
+        ));
 
 
         messagesList.add(new Message("user", fullStoryDescription));
@@ -69,6 +85,16 @@ public class StoryService {
         chapterRepository.save(chapter);
 
         return responseText;
+    }
+
+    public List<Chapter> getChaptersCreatedBefore(Integer chapterId) {
+        Chapter currentChapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new RuntimeException("Chapter not found"));
+        Game game = currentChapter.getGame();
+        List<Chapter> allChapters = chapterRepository.findByGame(game);
+        return allChapters.stream()
+                .filter(chapter -> chapter.getCreatedAt().isBefore(currentChapter.getCreatedAt()))
+                .collect(Collectors.toList());
     }
 
     public String getStoryByChapterId(Integer chapterId) {
