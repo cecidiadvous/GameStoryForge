@@ -99,6 +99,33 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.pdfcrowd</groupId>
+            <artifactId>pdfcrowd</artifactId>
+            <version>6.2.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pdfcrowd</groupId>
+            <artifactId>pdfcrowd</artifactId>
+            <version>5.0.0</version> <!-- Use the appropriate version -->
+        </dependency>
+
+        <dependency>
+            <groupId>com.pdfcrowd</groupId>
+            <artifactId>pdfcrowd</artifactId>
+            <version>6.2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.pdfcrowd</groupId>
+            <artifactId>pdfcrowd</artifactId>
+            <version>6.2.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/pdfcrowd-java/pdfcrowd-6.2.1.jar</systemPath>
+        </dependency>
+
 
     </dependencies>
     <dependencyManagement>

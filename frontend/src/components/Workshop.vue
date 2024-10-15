@@ -710,8 +710,32 @@ export default {
         console.error('Error translating text:', error);
         throw error;
       }
-    }
+    },
 
+    async handleDownload() {
+      if (!this.$route.params.gameId) {
+        console.error('No gameId available for download');
+        return;
+      }
+
+      try {
+        // 发送 GET 请求，传递 gameId 到后端
+        const response = await axios({
+          url: `/api/pdf/generate?gameID=${this.$route.params.gameId}`, // 使用 GET 请求
+          method: 'GET',
+          responseType: 'blob' // 将响应类型设置为 blob，便于处理文件下载
+        });
+
+        // 创建一个 URL 供下载使用
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = `game_${this.$route.params.gameId}.pdf`; // 设置下载的文件名
+        link.click(); // 触发下载
+      } catch (error) {
+        console.error('Error downloading PDF:', error);
+      }
+    }
   },
 
 
