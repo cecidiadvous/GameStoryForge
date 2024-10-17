@@ -28,14 +28,6 @@ public class PdfService {
     @Autowired
     private ChapterRepository chapterRepository;
 
-    /**
-     * 根据 gameId 从数据库获取数据，生成 PDF 文件
-     *
-     * @param gameId 传入的游戏 ID
-     * @return 生成的 PDF 文件
-     * @throws Pdfcrowd.Error
-     * @throws IOException
-     */
     public File generatePdfFromGameID(Long gameId) throws IOException, Pdfcrowd.Error {
         // 根据 gameId 获取游戏和相关章节数据
         Game game = gameRepository.findById(gameId)

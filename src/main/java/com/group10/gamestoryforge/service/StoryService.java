@@ -25,7 +25,7 @@ public class StoryService {
     @Autowired
     private ChapterRepository chapterRepository;
 
-    public String createStory(Integer chapterId, String storyDescription) {
+    public String createStory(Long chapterId, String storyDescription) {
 
         List<Chapter> chapters = getChaptersCreatedBefore(chapterId);
 
@@ -57,13 +57,23 @@ public class StoryService {
         List<Message> messagesList = new ArrayList<>();
 
         messagesList.add(new Message("system",
-                "You are an AI capable of generating detailed game storylines and including character dialogues based on the game characters and brief chapter summaries I provide." +
-                        "The stories should include the game's background, world-building, key events, quests, and character development." +
-                        "In each chapter, you will generate an engaging, immersive third-person narrative of 1,300 to 1,600 words, with characters that have distinctive personalities." +
+                "You are an AI capable of generating detailed game storyline(1,300 to 1,700 words) and including character dialogues based on the game characters and brief chapter summaries I provide." +
+                        "The storyline should include the game's background, world-building, key events, quests, and character development." +
+                        "In each chapter, you will generate an engaging, immersive third-person storyline of 1,300 to 1,700 words, with characters that have distinctive personalities." +
                         "The characters' dialogues should be naturally integrated into the story and reflect their traits." +
                         "The output language should be consistent with the input language provided by the user, and all punctuation should follow the rules of that language." +
                         "If this is not the first chapter, I will provide the previously generated dialogues and storyline, and you need to maintain the continuity and consistency of the story based on these."
         ));
+
+//        messagesList.add(new Message("system",
+//                "我是一个需要为自己制定一周锻炼计划的人。请为我提供一个详细的健身计划，分配到每天，涵盖不同的肌肉群和运动类型，适合我的体能水平。计划应包括以下方面：\n" +
+//                        "\n" +
+//                        "每天的具体锻炼内容，例如有氧训练（如跑步、骑自行车）、力量训练（如深蹲、卧推、硬拉）和柔韧性训练（如瑜伽或拉伸）。\n" +
+//                        "每个动作的建议组数和重复次数，适合中等强度的锻炼水平。\n" +
+//                        "每天的锻炼时间建议，以及休息日安排。"
+//        ));
+
+
 
 
         messagesList.add(new Message("user", fullStoryDescription));
@@ -87,7 +97,7 @@ public class StoryService {
         return responseText;
     }
 
-    public List<Chapter> getChaptersCreatedBefore(Integer chapterId) {
+    public List<Chapter> getChaptersCreatedBefore(Long chapterId) {
         Chapter currentChapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new RuntimeException("Chapter not found"));
         Game game = currentChapter.getGame();
@@ -97,7 +107,7 @@ public class StoryService {
                 .collect(Collectors.toList());
     }
 
-    public String getStoryByChapterId(Integer chapterId) {
+    public String getStoryByChapterId(Long chapterId) {
         Chapter chapter = chapterRepository.findById(chapterId)
                 .orElseThrow(() -> new RuntimeException("Chapter not found"));
 

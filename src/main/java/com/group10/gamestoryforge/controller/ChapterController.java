@@ -28,20 +28,20 @@ public class ChapterController {
     }
 
     @PostMapping("/{chapterId}/addCharacter")
-    public ResponseEntity<?> addCharacterToChapter(@PathVariable Integer chapterId, @RequestBody Map<String, Integer> payload) {
-        Integer characterId = payload.get("characterId");
+    public ResponseEntity<?> addCharacterToChapter(@PathVariable Long chapterId, @RequestBody Map<String, Long> payload) {
+        Long characterId = payload.get("characterId");
         chapterService.addCharacterToChapter(chapterId, characterId);
         return ResponseEntity.ok("Character added to chapter.");
     }
     @GetMapping("/{chapterId}/characters")
-    public List<Character> getCharactersByChapterId(@PathVariable Integer chapterId) {
+    public List<Character> getCharactersByChapterId(@PathVariable Long chapterId) {
 
         return chapterService.getCharactersByChapterId(chapterId);
     }
 
     @PostMapping("/{chapterId}/removeCharacter")
-    public ResponseEntity<?> removeCharacterFromChapter(@PathVariable Integer chapterId, @RequestBody Map<String, Integer> payload) {
-        Integer characterId = payload.get("characterId");
+    public ResponseEntity<?> removeCharacterFromChapter(@PathVariable Long chapterId, @RequestBody Map<String, Long> payload) {
+        Long characterId = payload.get("characterId");
         chapterService.removeCharacterFromChapter(chapterId, characterId);
         return ResponseEntity.ok("Character removed from chapter.");
     }
@@ -54,13 +54,13 @@ public class ChapterController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Chapter> updateChapter(@PathVariable Integer id, @RequestBody Chapter chapterDetails) {
+    public ResponseEntity<Chapter> updateChapter(@PathVariable Long id, @RequestBody Chapter chapterDetails) {
         Chapter updatedChapter = chapterService.updateChapter(id, chapterDetails);
         return ResponseEntity.ok(updatedChapter);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteChapter(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteChapter(@PathVariable Long id) {
         chapterService.deleteChapter(id);
         return ResponseEntity.noContent().build();
     }

@@ -14,7 +14,7 @@ public class Chapter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chapter_id")
-    private Integer chapterId;
+    private Long chapterId;
 
     @Column(nullable = false)
     private String name;
@@ -54,11 +54,11 @@ public class Chapter {
     }
 
     // Getters and Setters
-    public Integer getChapterId() {
+    public Long getChapterId() {
         return chapterId;
     }
 
-    public void setChapterId(Integer chapterId) {
+    public void setChapterId(Long chapterId) {
         this.chapterId = chapterId;
     }
 

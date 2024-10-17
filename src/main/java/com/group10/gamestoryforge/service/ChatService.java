@@ -36,7 +36,7 @@ public class ChatService {
         headers.setBearerAuth(apiKey);
 
         String model = "\"model\": \"gpt-4o\"";
-        int  max_tokens = 2000;
+        int  max_tokens = 3000;
 
         // 动态生成消息列表My Workspace
         //
@@ -93,10 +93,16 @@ public class ChatService {
                       }    
                         """;
 
+//            String requestBody = "{"
+//                    + model + ","
+//                    + messages + ","
+//                    + "\"max_tokens\": " + max_tokens + ","
+//                    + responseFormat
+//                    + "}";
+
             String requestBody = "{"
                     + model + ","
                     + messages + ","
-                    + "\"max_tokens\": " + max_tokens + ","
                     + responseFormat
                     + "}";
 

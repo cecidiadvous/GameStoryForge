@@ -19,7 +19,7 @@ public class CharacterService {
     @Autowired
     private GameService gameService;
 
-    public List<Character> getCharactersByGameId(Integer gameId) {
+    public List<Character> getCharactersByGameId(Long gameId) {
         return characterRepository.findByGameId(gameId);
     }
 
@@ -27,7 +27,7 @@ public class CharacterService {
         return characterRepository.findAll();
     }
 
-    public Optional<Character> getCharacterById(Integer id) {
+    public Optional<Character> getCharacterById(Long id) {
         return characterRepository.findById(id);
     }
 
@@ -48,7 +48,7 @@ public class CharacterService {
     }
 
     // 更新角色逻辑
-    public Character updateCharacter(Integer id, String characterJson, MultipartFile image) throws Exception {
+    public Character updateCharacter(Long id, String characterJson, MultipartFile image) throws Exception {
         // 将 JSON 转换为 Character 对象
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -75,7 +75,7 @@ public class CharacterService {
         return characterRepository.save(existingCharacter);  // 保存更新后的角色
     }
 
-    public void deleteCharacter(Integer id) {
+    public void deleteCharacter(Long id) {
         characterRepository.findById(id).ifPresent(character -> {
             // 删除游戏关联的图片
             gameService.deleteGameImage(character.getImage());

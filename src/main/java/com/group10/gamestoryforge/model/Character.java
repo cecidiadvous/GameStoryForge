@@ -18,7 +18,7 @@ public class Character {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "character_id")
-    private Integer characterId;
+    private Long characterId;
 
     @Column(nullable = false)
     private String name;
@@ -33,7 +33,7 @@ public class Character {
     private String ability;
 
     @Column(name = "game_id", nullable = false)
-    private Integer gameId;
+    private Long gameId;
 
     @Column(name = "image")
     private String image;
@@ -46,11 +46,11 @@ public class Character {
     }
 
     // Getters and Setters
-    public Integer getCharacterId() {
+    public Long getCharacterId() {
         return characterId;
     }
 
-    public void setCharacterId(Integer characterId) {
+    public void setCharacterId(Long characterId) {
         this.characterId = characterId;
     }
 
@@ -86,11 +86,11 @@ public class Character {
         this.ability = ability;
     }
 
-    public Integer getGameId() {
+    public Long getGameId() {
         return gameId;
     }
 
-    public void setGameId(Integer gameId) {
+    public void setGameId(Long gameId) {
         this.gameId = gameId;
     }
 

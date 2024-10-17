@@ -21,14 +21,14 @@ public class StoryController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createStory(@RequestBody Map<String, Object> payload) {
-        int chapterId = Integer.parseInt(payload.get("chapterId").toString());
+        Long chapterId = Long.parseLong(payload.get("chapterId").toString());
         String storyDescription = payload.get("storyDescription").toString();
         String responseText = storyService.createStory(chapterId, storyDescription);
         return ResponseEntity.ok(responseText);
     }
 
     @GetMapping("/{chapterId}")
-    public ResponseEntity<?> getStory(@PathVariable Integer chapterId) {
+    public ResponseEntity<?> getStory(@PathVariable Long chapterId) {
         String responseText = storyService.getStoryByChapterId(chapterId);
         return ResponseEntity.ok(responseText);
     }

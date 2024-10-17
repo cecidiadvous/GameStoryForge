@@ -6,8 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CharacterRepository extends JpaRepository<Character, Integer> {
-    List<Character> findByGameId(Integer gameId);
-    List<Character> findByChapters_ChapterId(Integer chapterId);
+public interface CharacterRepository extends JpaRepository<Character, Long> {
+    List<Character> findByGameId(Long gameId);
+    List<Character> findByChapters_ChapterId(Long chapterId);
 }
 

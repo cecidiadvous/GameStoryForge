@@ -30,7 +30,7 @@ public class ChapterService {
         return chapterRepository.findAll();
     }
 
-    public Optional<Chapter> getChapterById(Integer id) {
+    public Optional<Chapter> getChapterById(Long id) {
         return chapterRepository.findById(id);
     }
 
@@ -51,7 +51,7 @@ public class ChapterService {
         return chapters;
     }
 
-    public void addCharacterToChapter(Integer chapterId, Integer characterId) {
+    public void addCharacterToChapter(Long chapterId, Long characterId) {
 
         Chapter chapter = chapterRepository.findById(chapterId).orElseThrow();
         Character character = characterRepository.findById(characterId).orElseThrow();
@@ -61,11 +61,11 @@ public class ChapterService {
         chapterRepository.save(chapter);
     }
 
-    public List<Character> getCharactersByChapterId(Integer chapterId) {
+    public List<Character> getCharactersByChapterId(Long chapterId) {
         return characterRepository.findByChapters_ChapterId(chapterId);
     }
 
-    public void removeCharacterFromChapter(Integer chapterId, Integer characterId) {
+    public void removeCharacterFromChapter(Long chapterId, Long characterId) {
         Chapter chapter = chapterRepository.findById(chapterId).orElseThrow();
         Character character = characterRepository.findById(characterId).orElseThrow();
 
@@ -87,14 +87,14 @@ public class ChapterService {
         return chapterRepository.save(chapterDetails);
     }
 
-    public Chapter updateChapter(Integer id, Chapter chapterDetails) {
+    public Chapter updateChapter(Long id, Chapter chapterDetails) {
         Chapter chapter = chapterRepository.findById(id).orElseThrow();
         chapter.setName(chapterDetails.getName());
         chapter.setUpdatedAt(LocalDateTime.now());
         return chapterRepository.save(chapter);
     }
 
-    public void deleteChapter(Integer id) {
+    public void deleteChapter(Long id) {
         chapterRepository.deleteById(id);
     }
 }

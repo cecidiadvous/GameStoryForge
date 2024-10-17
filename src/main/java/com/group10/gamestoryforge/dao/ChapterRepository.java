@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ChapterRepository extends JpaRepository<Chapter, Integer> {
+public interface ChapterRepository extends JpaRepository<Chapter, Long> {
     List<Chapter> findByGame(Game game);
 }
 

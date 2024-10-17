@@ -21,7 +21,7 @@ public class CharacterController {
     private CharacterService characterService;
 
     @GetMapping
-    public ResponseEntity<List<Character>> getCharactersByGameId(@RequestParam Integer gameId) {
+    public ResponseEntity<List<Character>> getCharactersByGameId(@RequestParam Long gameId) {
         List<Character> characters = characterService.getCharactersByGameId(gameId);
         return ResponseEntity.ok(characters);
     }
@@ -38,7 +38,7 @@ public class CharacterController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Character> updateCharacter(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @RequestPart("character") String characterJson,
             @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
 
@@ -50,7 +50,7 @@ public class CharacterController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCharacter(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteCharacter(@PathVariable Long id) {
         characterService.deleteCharacter(id);
         return ResponseEntity.noContent().build();
     }
