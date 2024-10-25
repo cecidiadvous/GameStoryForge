@@ -22,7 +22,7 @@
           <button class="edit-button" @click="editGame(index)">
             <img src="@/assets/edit_button.svg" alt="Edit" class="edit-icon">
           </button>
-          <!-- 删除按钮 -->
+
           <button class="delete-button" @click="deleteGame(index)">
             <img src="@/assets/delete_icon.svg" alt="Delete" class="delete-icon">
           </button>
@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <!-- 弹出表单 -->
+
     <div v-if="showForm" class="popup-form">
       <div class="form-container">
         <h2 v-if="editingIndex === -1">New Game</h2>
@@ -60,19 +60,19 @@ export default {
   data() {
     return {
       showForm: false,
-      editingIndex: -1, // 用于追踪正在编辑的游戏索引
+      editingIndex: -1,
       defaultImage: backgroundImage,
       newGame: {
         name: '',
         gameId: '',
         description: '',
-        image: '', // 将图像路径初始为空
+        image: '',
       },
-      games: [], // 通过后端获取的游戏数据初始化为空数组
+      games: [],
     };
   },
   async mounted() {
-    await this.fetchGames(); // 页面加载时从后端获取游戏数据
+    await this.fetchGames();
   },
   methods: {
     goToWarkshop(gameId) {
@@ -96,19 +96,18 @@ export default {
           console.error('Error fetching games:', error);
         }
       } else {
-        this.$router.push('/auth'); // 如果用户未登录，跳转到登录页面
+        this.$router.push('/auth');
       }
     },
 
     // 添加游戏
     async addGame() {
-      const user = JSON.parse(localStorage.getItem('user')); // 获取当前用户
-      const formData = new FormData(); // 创建 FormData 对象，用于包含文件和其他字段
+      const user = JSON.parse(localStorage.getItem('user'));
+      const formData = new FormData();
 
-      // 将图片文件和其他字段添加到 FormData 中
       formData.append('name', this.newGame.name);
       formData.append('description', this.newGame.description);
-      formData.append('image', this.newGame.image); // 假设 this.newGame.image 是文件对象
+      formData.append('image', this.newGame.image);
       formData.append('username', user.username);
 
       if (this.newGame.name && this.newGame.description) {
@@ -116,16 +115,16 @@ export default {
           // 发送 POST 请求到后端，包括 FormData 数据
           const response = await axios.post('/api/dashboard/games', formData, {
             headers: {
-              'Content-Type': 'multipart/form-data' // 指定为文件表单类型
+              'Content-Type': 'multipart/form-data'
             }
           });
 
-          // 为新游戏设置图片URL
+
           response.data.image = response.data.image
               ? `http://localhost:8080${response.data.image}`
               : this.defaultImage;
 
-          this.games.push(response.data); // 添加游戏到前端列表
+          this.games.push(response.data);
           this.showForm = false;
           this.resetForm();
         } catch (error) {
@@ -135,11 +134,11 @@ export default {
     },
     editGame(index) {
       this.editingIndex = index;
-      this.newGame = { ...this.games[index] }; // 将选中的游戏数据复制到表单中
+      this.newGame = { ...this.games[index] };
       this.showForm = true;
     },
     async updateGame() {
-      const user = JSON.parse(localStorage.getItem('user')); // 从 localStorage 中获取当前用户
+      const user = JSON.parse(localStorage.getItem('user'));
       if (this.editingIndex !== -1) {
         try {
           const formData = new FormData();
@@ -174,7 +173,7 @@ export default {
       try {
         const gameId = this.games[index].gameId;
         await axios.delete(`/api/dashboard/games/${gameId}`);
-        this.games.splice(index, 1); // 从前端移除已删除的游戏
+        this.games.splice(index, 1);
       } catch (error) {
         console.error('Error deleting game:', error);
       }
@@ -269,11 +268,11 @@ export default {
   font-size: 26px;
   font-weight: normal;
   color: #ffffff;
-  text-align: left; /* 将标题对齐方式改为居左 */
-  margin: 0px ; /* 上下边距 */
-  margin-left: 50px; /* 左边距，确保与左侧有适当的间距 */
+  text-align: left;
+  margin: 0px ;
+  margin-left: 50px;
   font-family: 'Lora', serif;
-  padding-top: 60px; /* 上边距 */
+  padding-top: 60px;
 }
 
 
@@ -288,26 +287,26 @@ export default {
 }
 
 .game-card {
-  width: 250px;  /* 固定宽度 */
-  height: 250px; /* 固定高度 */
+  width: 250px;
+  height: 250px;
   background-color: #3f3f48;
   padding: 0px;
   border-radius: 12px;
   text-align: center;
-  box-sizing: border-box; /* 确保 padding 不影响卡片宽度 */
+  box-sizing: border-box;
   color: #D2D2D2;
 
 }
 
 .game-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* 鼠标悬停时加重阴影 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .game-card img {
   width: 100%;
-  height: 80%; /* 确保图片充满容器 */
+  height: 80%;
   border-radius: 12px 12px 0px 0px;
-  object-fit: cover; /* 自动裁剪图片以适应容器 */
+  object-fit: cover;
   cursor: pointer;
 }
 
@@ -331,7 +330,7 @@ export default {
   position: absolute;
   width: 38px;
   bottom: 15px;
-  right: 205px; /* 确保编辑按钮在删除按钮的左边 */
+  right: 205px;
   padding: 5px;
   background-color: rgba(63, 125, 101, 0);
   border: none;
@@ -339,14 +338,14 @@ export default {
 }
 
 .edit-button:hover {
-  transform: scale(1.1); /* 鼠标悬停时放大 */
+  transform: scale(1.1);
 }
 
 .delete-button {
   position: absolute;
   width: 38px;
   bottom: 15px;
-  right: 5px; /* 设置删除按钮的位置 */
+  right: 5px;
   padding: 5px;
   background-color: rgba(63, 125, 101, 0);
   border: none;
@@ -354,7 +353,7 @@ export default {
 }
 
 .delete-button:hover {
-  transform: scale(1.1); /* 鼠标悬停时放大 */
+  transform: scale(1.1);
 }
 
 .edit-icon, .delete-icon {
@@ -377,7 +376,7 @@ export default {
 }
 
 .add-card span {
-  font-size: 68px; /* 调整“+”号的大小 */
+  font-size: 68px;
   color: #D2D2D2;
 }
 

@@ -20,10 +20,7 @@
     <div v-if="message" :class="{'error-message': isError, 'success-message': !isError}">
       {{ message }}
     </div>
-<!--    <div class="register-link">-->
-<!--      &lt;!&ndash; 注册链接 &ndash;&gt;-->
-<!--      Don't have an account? <router-link to="/register">Register here</router-link>-->
-<!--    </div>-->
+
   </div>
 </template>
 
@@ -47,12 +44,12 @@ export default {
         const response = await axios.post('/api/auth/register', {
           username: this.username,
           password: this.password,
-          role: this.role || 'USER', // 默认角色是 USER
+          role: this.role || 'USER',
         });
         this.message = response.data.message;
         this.isError = false;
 
-        // 注册成功后跳转到登录页面
+
         this.$router.push('/auth');
       } catch (err) {
         this.message = 'Registration failed: ' + (err.response && err.response.data.message ? err.response.data.message : err.message);
@@ -65,14 +62,14 @@ export default {
 
 <style scoped>
 .register-container {
-  max-width: 500px; /* 最大宽度为400px */
+  max-width: 500px;
   aspect-ratio: 3.5 / 4;
   margin: 0 auto;
   padding: 1rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.9); /* 使登录表单有轻微的背景 */
+  background: rgba(255, 255, 255, 0.9);
   color: #333;
 }
 

@@ -37,7 +37,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      showLogin: true, // 控制显示登录还是注册组件
+      showLogin: true,
       username: '',
       password: '',
       message: '',
@@ -66,7 +66,7 @@ export default {
         });
         // alert('Login successful! Welcome, ' + response.data.username);
         localStorage.setItem('user', JSON.stringify(response.data));
-        this.$router.push('/home'); // 登录成功后跳转到主页
+        this.$router.push('/home');
       } catch (err) {
         this.handleError(err, 'Invalid username or password');
       }
@@ -80,7 +80,7 @@ export default {
         alert('Registration successful!');
         this.message = 'Registration successful!';
         this.isError = false;
-        this.toggleForm(); // 注册成功后自动切换到登录页面
+        this.toggleForm();
       } catch (err) {
         this.handleError(err, 'Registration failed');
       }
@@ -104,7 +104,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url('@/assets/background.png'); /* 替换为你的背景图片路径 */
+  background-image: url('@/assets/background.png');
   background-size: cover;
   background-position: center;
   flex-direction: column

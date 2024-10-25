@@ -44,7 +44,7 @@ export default {
       this.$router.push('/auth');
     },
     startBuilding() {
-      this.$router.push('/dashboard'); // 导航到Dashboard页面
+      this.$router.push('/dashboard');
     }
   }
 };

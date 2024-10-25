@@ -48,14 +48,13 @@
           {{ chapter.name }}
         </span>
           <div class="menu-wrapper">
-            <!-- 三点图标，选中或悬停时显示 -->
             <button
                 class="menu-button"
                 v-if="chapter.chapterId === selectedChapter?.chapterId || chapter.showMenu"
                 @click.stop="toggleMenu(chapter.chapterId)">
-              &#8942; <!-- 三点符号 -->
+              &#8942;
             </button>
-            <!-- 弹出菜单 -->
+
             <div v-if="chapter.showMenu" class="menu-dropdown">
               <button @click="openRenameModal(chapter)">Rename</button>
               <button class="delete" @click="openDeleteModal(chapter)">Delete</button>
@@ -101,7 +100,18 @@
               <div class="story-box-wrapper">
               <section class="story-box">
                 <textarea v-model="storyDescription" class="story-textarea" placeholder="Describe the style and story of the game"></textarea>
-                <img src="@/assets/create_button3.svg" @click="createStory" class="create-button" alt="Create Story"/>
+                <!-- 使用 v-if 和 v-else 切换不同状态的按钮 -->
+                <img v-if="!isCreatingStory"
+                     :class="['create-button', { 'active': storyDescription !== '' }]"
+                     src="@/assets/create_button3.svg"
+                     @click="handleCreateStory"
+                     alt="Create Story"/>
+
+                <!-- 加载中的SVG -->
+                <img v-else
+                     class="loading-icon"
+                     :src="loadingIcon"
+                     alt="Loading..." />
               </section>
               </div>
             </div>
@@ -172,11 +182,11 @@
         <section class="instructions">
           <h3>Instruction</h3>
           <p>1. Select a Chapter: Use the left sidebar to choose or add a chapter.</p>
-          <p>2. Select Characters: Drag characters from "Character Select" to the "Character List" to include them in the story.</p>
-          <p>3. Customize Characters: Click on a character in the "Character List".</p>
-          <p>4. Write the Draft: Use the "Describe the style and story of the game" box to draft.</p>
-          <p>5. Generate Story Dialogue.</p>
-          <p>6. Download: download the final content.</p>
+          <p>2. Create and Select Characters: Create new characters and click characters from "Character List" to the "Character Select" to include them in the chapter.</p>
+          <p>3. Write the Draft: Use the "Describe the style and story of the game" box to draft.</p>
+          <p>4. Click the button to generate Storyline and Dialogue.</p>
+          <p>5. Translation: translates the game’s storyline and dialogues into the chosen language.</p>
+          <p>6. Download: download the entire game.</p>
         </section>
       </div>
     </div>
@@ -276,6 +286,7 @@
 import Modal from './Modal.vue';
 import axios from 'axios';
 import backgroundImage from '@/assets/background.png';
+import loadingIcon from '@/assets/LineMdLoadingTwotoneLoop.svg';
 
 export default {
   components: {
@@ -306,7 +317,9 @@ export default {
       originalDialogueDescription: '', // 新增变量保存原始对话描述
       selectedLanguage: 'zh',
       selectedLanguageName: 'Chinese (Simplified)',
-      dropdownOpen: false
+      dropdownOpen: false,
+      isCreatingStory: false,
+      loadingIcon: loadingIcon
     };
   },
   async mounted() {
@@ -635,6 +648,13 @@ export default {
       }
     },
 
+    async handleCreateStory() {
+      if (!this.storyDescription) return;
+
+      this.isCreatingStory = true; // 显示加载图标
+      await this.createStory();     // 调用 createStory 方法
+      this.isCreatingStory = false; // 数据返回后恢复原按钮
+    },
     async createStory() {
       if (!this.selectedChapter || !this.selectedChapter.chapterId) {
         console.error('No chapter selected');
@@ -1278,7 +1298,7 @@ html, body {
   width: 490px;
   height: 275px;
   background-color: rgba(62, 64, 74, 0);
-  color: #fff;
+  color: #ffffff;
   border: none;
   border-radius: 12px;
 
@@ -1306,14 +1326,32 @@ html, body {
   margin-top: 1px;
   margin-bottom: 10px;
   cursor: pointer;
-  width: 37px; /* Adjust the size as needed */
-  height: 37px; /* Adjust the size as needed */
-  padding: 0;
+  width: 37px;
+  height: 37px;
 }
 
-.create-button:hover {
-  filter: brightness(1.2); /* Add a hover effect */
+.loading-icon {
+  width: 37px;
+  height: 37px;
+  animation: spin 1s linear infinite; /* 添加旋转动画 */
 }
+
+/* 动画样式 */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.create-button.active {
+  filter: brightness(1.5); /* 高亮效果 */
+}
+
+.create-button.loading {
+  filter: grayscale(100%); /* 变灰效果 */
+}
+
+
+
 
 .storyline-box-wrapper {
   background-color: rgba(62, 64, 74, 0.95); /* Adjust the border color and width as needed */
