@@ -15,7 +15,6 @@ GameStoryForge is a system that generates game storylines using the OpenAI API. 
   - [Backend Setup](#backend-setup)
   - [Frontend Setup](#frontend-setup)
   - [Accessing the Application](#accessing-the-application)
-- [Additional Notes](#additional-notes)
 
 ## Libraries Used
 
@@ -93,106 +92,9 @@ GameStoryForge is a system that generates game storylines using the OpenAI API. 
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/yourusername/GameStoryForge.git
+   git clone https://github.sydney.edu.au/2024ELEC5619/Tue-05-08-Lab-Group-10.git
    cd GameStoryForge
     ```
-
-[//]: # (Set Up PostgreSQL Database)
-
-[//]: # ()
-[//]: # (Install PostgreSQL if not already installed.)
-
-[//]: # (Create a new database for the application.)
-
-[//]: # (Configure Application Properties)
-
-[//]: # ()
-[//]: # (Navigate to src/main/resources/application.properties.)
-
-[//]: # (Update the database connection settings:)
-
-[//]: # (properties)
-
-[//]: # (Copy code)
-
-[//]: # (spring.datasource.url=jdbc:postgresql://localhost:5432/your_database_name)
-
-[//]: # (spring.datasource.username=your_database_username)
-
-[//]: # (spring.datasource.password=your_database_password)
-
-[//]: # (Add your OpenAI API key:)
-
-[//]: # (properties)
-
-[//]: # (Copy code)
-
-[//]: # (openai.api.key=your_openai_api_key)
-
-[//]: # (Build and Run the Backend)
-
-[//]: # ()
-[//]: # (bash)
-
-[//]: # (Copy code)
-
-[//]: # (mvn clean install)
-
-[//]: # (mvn spring-boot:run)
-
-[//]: # (The backend server will start on http://localhost:8080.)
-
-[//]: # ()
-[//]: # (Frontend Setup)
-
-[//]: # (Navigate to Frontend Directory)
-
-[//]: # ()
-[//]: # (bash)
-
-[//]: # (Copy code)
-
-[//]: # (cd frontend)
-
-[//]: # (Install Dependencies)
-
-[//]: # ()
-[//]: # (bash)
-
-[//]: # (Copy code)
-
-[//]: # (npm install)
-
-[//]: # (Run the Frontend Application)
-
-[//]: # ()
-[//]: # (bash)
-
-[//]: # (Copy code)
-
-[//]: # (npm run dev)
-
-[//]: # (The frontend will be accessible at http://localhost:3000.)
-
-[//]: # ()
-[//]: # (Accessing the Application)
-
-[//]: # (Open your web browser and navigate to http://localhost:3000.)
-
-[//]: # (Register a new account or log in with existing credentials.)
-
-[//]: # (Start creating games, characters, and chapters.)
-
-[//]: # (Additional Notes)
-
-[//]: # (Concurrent Servers: Ensure both frontend and backend servers are running simultaneously.)
-
-[//]: # (Error Handling: Check console logs for any errors during setup.)
-
-[//]: # (Configuration Verification: For any issues, verify configurations and dependencies.)
-
-[//]: # (API Limits: Be aware of OpenAI API usage limits to avoid service interruptions.)
-
 2. **Set Up PostgreSQL Database**
     - Install PostgreSQL if not already installed.
     - Create a new database for the application.
