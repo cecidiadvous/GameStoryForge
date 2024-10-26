@@ -42,12 +42,6 @@ public class ChapterService {
         // Use the Game entity to find all chapters related to this game
         List<Chapter> chapters = chapterRepository.findByGame(game);
         chapters.sort(Comparator.comparing(Chapter::getCreatedAt));
-        for (Chapter chapter : chapters) {
-
-            System.out.println("Chapter Name: " + chapter.getName());
-            System.out.println("Chapter Created At: " + chapter.getCreatedAt());
-            System.out.println("-----------------------------");
-        }
         return chapters;
     }
 

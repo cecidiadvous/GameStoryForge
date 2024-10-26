@@ -18,7 +18,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(@RequestBody UserData user) {
-        System.out.println("Registering user: " + user.getUsername());
+
         if (user.getRole() == null) {
             user.setRole("USER"); // 默认角色
         }
@@ -39,7 +39,7 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> login(@RequestBody UserData user) {
         UserData authenticatedUser = userService.loginUser(user.getUsername(), user.getPassword());
         if (authenticatedUser != null) {
-            System.out.println("Logging in user: " + user.getUsername());
+
             // 创建一个 Map 来保存返回的数据
             Map<String, String> response = new HashMap<>();
             response.put("username", authenticatedUser.getUsername());

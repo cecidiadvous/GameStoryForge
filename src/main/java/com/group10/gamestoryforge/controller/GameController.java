@@ -53,7 +53,6 @@ public class GameController {
     @GetMapping
     public ResponseEntity<List<Game>> getGamesByUsername(@RequestParam String username) {
         List<Game> games = gameService.getGamesByUsername(username);
-        System.out.println("Number of games retrieved: " + games.size());
         return ResponseEntity.ok(games);
 
     }

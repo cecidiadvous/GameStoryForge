@@ -36,12 +36,6 @@ public class PdfService {
         // 使用 Game 实体查找相关章节
         List<Chapter> chapters = chapterRepository.findByGame(game);
 
-        // 打印章节信息（可选）
-        for (Chapter chapter : chapters) {
-            System.out.println("Chapter Name: " + chapter.getName());
-            System.out.println("Chapter Created At: " + chapter.getCreatedAt());
-            System.out.println("-----------------------------");
-        }
 
         // 构建 HTML 内容
         StringBuilder htmlContent = new StringBuilder();
