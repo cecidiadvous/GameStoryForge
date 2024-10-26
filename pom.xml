@@ -122,14 +122,14 @@
             <groupId>com.pdfcrowd</groupId>
             <artifactId>pdfcrowd</artifactId>
             <version>6.2.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/pdfcrowd-java/pdfcrowd-6.2.1.jar</systemPath>
+            <!-- <scope>system</scope>
+            <systemPath>${project.basedir}/pdfcrowd-java/pdfcrowd-6.2.1.jar</systemPath> -->
         </dependency>
 
         <!-- JUnit 5 (Jupiter) -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
+            <artifactId>junit-jupiter-engine</artifactId>
             <version>5.9.3</version>
             <scope>test</scope>
         </dependency>
@@ -196,6 +196,25 @@
             </plugin>
 
             <!-- JaCoCo Plugin for code coverage -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.8</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
         </plugins>
     </build>
