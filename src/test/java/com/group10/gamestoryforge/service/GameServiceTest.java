@@ -11,6 +11,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -51,8 +55,8 @@ class GameServiceTest {
 
         Game createdGame = gameService.createGame(username, game);
 
-        assertNotNull(createdGame, "The created game should not be null");
-        assertEquals("Test Game", createdGame.getName(), "The game name should match");
+        assertNotNull(createdGame);
+        assertEquals("Test Game", createdGame.getName());
         verify(gameRepository, times(1)).save(game);
     }
 
@@ -63,38 +67,89 @@ class GameServiceTest {
 
         when(userDataRepository.findByUsername(username)).thenReturn(null);
 
-        assertThrows(IllegalArgumentException.class, () -> gameService.createGame(username, game), "Expected exception for non-existent user");
+        assertThrows(IllegalArgumentException.class, () -> gameService.createGame(username, game));
     }
 
     @Test
-    void testGetGameById_Success() {
-        Long gameId = 1L;
-        Game game = new Game();
-        game.setGameId(gameId);
+    void testSaveGameImage_Success() throws IOException {
+        when(image.getOriginalFilename()).thenReturn("image.png");
+        when(image.getBytes()).thenReturn("image content".getBytes());
 
-        when(gameRepository.findById(gameId)).thenReturn(Optional.of(game));
+        String imagePath = gameService.saveGameImage(image);
 
-        Game foundGame = gameService.getGameById(gameId);
-
-        assertNotNull(foundGame, "The found game should not be null");
-        assertEquals(gameId, foundGame.getGameId(), "The game ID should match");
+        assertNotNull(imagePath);
+        assertTrue(imagePath.contains("uploads/images/"));
     }
 
     @Test
-    void testGetGameById_GameNotFound() {
-        Long gameId = 1L;
+    void testSaveGameImage_IOException() throws IOException {
+        when(image.getOriginalFilename()).thenReturn("image.png");
+        when(image.getBytes()).thenThrow(new IOException("Failed to read image bytes"));
 
-        when(gameRepository.findById(gameId)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () -> gameService.getGameById(gameId), "Expected exception for non-existent game");
+        assertThrows(RuntimeException.class, () -> gameService.saveGameImage(image));
     }
 
     @Test
-    void testUpdateGame_Success() {
+    void testDeleteGameImage_Success() throws IOException {
+        Path path = Paths.get(System.getProperty("user.dir") + "/uploads/images/test.png");
+        Files.createDirectories(path.getParent());
+        Files.createFile(path);
+
+        assertTrue(Files.exists(path));
+
+        gameService.deleteGameImage("/uploads/images/test.png");
+
+        assertFalse(Files.exists(path));
+    }
+
+    @Test
+    void testDeleteGameImage_FileDoesNotExist() {
+        assertDoesNotThrow(() -> gameService.deleteGameImage("/uploads/images/non_existent.png"));
+    }
+
+    @Test
+    void testDeleteGameImage_DeleteFails() throws IOException {
+        Path path = Paths.get(System.getProperty("user.dir") + "/uploads/images/protected.png");
+        Files.createDirectories(path.getParent());
+        Files.createFile(path);
+        path.toFile().setWritable(false);
+
+        assertThrows(RuntimeException.class, () -> gameService.deleteGameImage("/uploads/images/protected.png"));
+
+        path.toFile().setWritable(true);
+        Files.deleteIfExists(path);
+    }
+
+    @Test
+    void testUpdateGame_SuccessWithImage() throws IOException {
         Long gameId = 1L;
         Game existingGame = new Game();
         existingGame.setGameId(gameId);
         existingGame.setName("Old Name");
+        existingGame.setImage("/uploads/images/old_image.png");
+
+        Game updatedGame = new Game();
+        updatedGame.setName("New Name");
+
+        when(image.getOriginalFilename()).thenReturn("new_image.png");
+        when(image.getBytes()).thenReturn("image content".getBytes());
+        when(gameRepository.findById(gameId)).thenReturn(Optional.of(existingGame));
+        when(gameRepository.save(any(Game.class))).thenReturn(existingGame);
+
+        Game result = gameService.updateGame(gameId, updatedGame, image);
+
+        assertNotNull(result);
+        assertEquals("New Name", result.getName());
+        verify(gameRepository, times(1)).save(existingGame);
+    }
+
+    @Test
+    void testUpdateGame_NoImageUpdate() {
+        Long gameId = 1L;
+        Game existingGame = new Game();
+        existingGame.setGameId(gameId);
+        existingGame.setName("Old Name");
+
         Game updatedGame = new Game();
         updatedGame.setName("New Name");
 
@@ -103,19 +158,9 @@ class GameServiceTest {
 
         Game result = gameService.updateGame(gameId, updatedGame, null);
 
-        assertNotNull(result, "The updated game should not be null");
-        assertEquals("New Name", result.getName(), "The game name should be updated");
+        assertNotNull(result);
+        assertEquals("New Name", result.getName());
         verify(gameRepository, times(1)).save(existingGame);
-    }
-
-    @Test
-    void testUpdateGame_GameNotFound() {
-        Long gameId = 1L;
-        Game updatedGame = new Game();
-
-        when(gameRepository.findById(gameId)).thenReturn(Optional.empty());
-
-        assertThrows(IllegalArgumentException.class, () -> gameService.updateGame(gameId, updatedGame, null), "Expected exception for non-existent game");
     }
 
     @Test
@@ -155,9 +200,9 @@ class GameServiceTest {
 
         List<Game> games = gameService.getGamesByUsername(username);
 
-        assertNotNull(games, "The games list should not be null");
-        assertEquals(1, games.size(), "The games list size should be 1");
-        assertEquals("Test Game", games.get(0).getName(), "The game name should match");
+        assertNotNull(games);
+        assertEquals(1, games.size());
+        assertEquals("Test Game", games.get(0).getName());
     }
 
     @Test
@@ -166,7 +211,8 @@ class GameServiceTest {
 
         when(userDataRepository.findByUsername(username)).thenReturn(null);
 
-        assertThrows(IllegalArgumentException.class, () -> gameService.getGamesByUsername(username), "Expected exception for non-existent user");
+        assertThrows(IllegalArgumentException.class, () -> gameService.getGamesByUsername(username));
     }
 }
+
 

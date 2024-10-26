@@ -58,15 +58,40 @@ class CharacterTest {
     }
 
     @Test
-    void testDeleteImage() throws Exception {
-        // Create a temporary image file to simulate the delete
+    void testDeleteImage_Success() throws Exception {
         Path tempImagePath = Paths.get(System.getProperty("user.dir") + "/images/test_character.png");
         Files.createDirectories(tempImagePath.getParent());
         Files.createFile(tempImagePath);
-        
+
+        assertTrue(Files.exists(tempImagePath));
+
         character.deleteImage();
-        
+
         assertFalse(Files.exists(tempImagePath));
+    }
+
+    @Test
+    void testDeleteImage_FileDoesNotExist() {
+        character.setImage("/images/non_existent_image.png");
+
+        assertDoesNotThrow(() -> character.deleteImage());
+    }
+
+    @Test
+    void testDeleteImage_DeleteFails() throws Exception {
+        Path tempImagePath = Paths.get(System.getProperty("user.dir") + "/images/protected_image.png");
+        Files.createDirectories(tempImagePath.getParent());
+        Files.createFile(tempImagePath);
+
+        tempImagePath.toFile().setWritable(false);
+
+        character.setImage("/images/protected_image.png");
+
+        Exception exception = assertThrows(RuntimeException.class, () -> character.deleteImage());
+        assertTrue(exception.getMessage().contains("Failed to delete image"));
+
+        tempImagePath.toFile().setWritable(true);
+        Files.deleteIfExists(tempImagePath);
     }
 
     @Test
@@ -74,4 +99,11 @@ class CharacterTest {
         String expectedString = "Character{, name='Test Character', role='Warrior', background='A brave warrior from the east', ability='Sword Mastery'}";
         assertEquals(expectedString, character.toString());
     }
+
+    @Test
+    void testDeleteImage_ImageIsNull() {
+        character.setImage(null);
+        assertDoesNotThrow(() -> character.deleteImage());
+    }
 }
+

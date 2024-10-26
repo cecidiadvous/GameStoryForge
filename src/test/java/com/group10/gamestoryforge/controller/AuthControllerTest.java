@@ -31,11 +31,12 @@ class AuthControllerTest {
     }
 
     @Test
-    void testRegisterUser_Success() {
+    void testRegisterUser_Success_WithDefaultRole() {
         UserData userData = new UserData();
         userData.setUsername("testUser");
         userData.setPassword("password");
         userData.setRole(null);
+
         when(userService.registerUser(eq("testUser"), eq("password"), eq("USER"))).thenReturn(userData);
 
         ResponseEntity<Map<String, String>> response = authController.register(userData);
@@ -45,11 +46,27 @@ class AuthControllerTest {
     }
 
     @Test
+    void testRegisterUser_Success_WithCustomRole() {
+        UserData userData = new UserData();
+        userData.setUsername("adminUser");
+        userData.setPassword("password");
+        userData.setRole("ADMIN");
+
+        when(userService.registerUser(eq("adminUser"), eq("password"), eq("ADMIN"))).thenReturn(userData);
+
+        ResponseEntity<Map<String, String>> response = authController.register(userData);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("User registered with username: adminUser", response.getBody().get("message"));
+    }
+
+    @Test
     void testRegisterUser_UsernameTaken() {
         UserData userData = new UserData();
         userData.setUsername("testUser");
         userData.setPassword("password");
         userData.setRole(null);
+
         when(userService.registerUser(eq("testUser"), eq("password"), eq("USER"))).thenReturn(null);
 
         ResponseEntity<Map<String, String>> response = authController.register(userData);
@@ -87,3 +104,4 @@ class AuthControllerTest {
         assertEquals("Invalid username or password", response.getBody().get("message"));
     }
 }
+

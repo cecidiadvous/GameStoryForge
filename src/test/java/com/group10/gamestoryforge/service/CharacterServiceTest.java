@@ -93,6 +93,28 @@ class CharacterServiceTest {
     }
 
     @Test
+    void testAddCharacter_NoImage() throws Exception {
+        String characterJson = new ObjectMapper().writeValueAsString(character);
+        when(characterRepository.save(any(Character.class))).thenReturn(character);
+
+        Character result = characterService.addCharacter(characterJson, null);
+
+        assertNotNull(result);
+        assertEquals("Test Character", result.getName());
+        verify(characterRepository, times(1)).save(any(Character.class));
+        verify(gameService, never()).saveGameImage(any(MultipartFile.class));
+    }
+
+    @Test
+    void testAddCharacter_InvalidJson() {
+        String invalidCharacterJson = "{invalid json}";
+
+        assertThrows(Exception.class, () -> {
+            characterService.addCharacter(invalidCharacterJson, image);
+        });
+    }
+
+    @Test
     void testUpdateCharacter() throws Exception {
         String updatedName = "Updated Character";
         character.setName(updatedName);
@@ -110,6 +132,51 @@ class CharacterServiceTest {
     }
 
     @Test
+    void testUpdateCharacter_NoImage() throws Exception {
+        String updatedName = "Updated Character";
+        character.setName(updatedName);
+        String characterJson = new ObjectMapper().writeValueAsString(character);
+
+        Character existingCharacter = new Character();
+        existingCharacter.setCharacterId(1L);
+        existingCharacter.setName("Old Character");
+
+        when(characterRepository.findById(1L)).thenReturn(Optional.of(existingCharacter));
+        when(characterRepository.save(any(Character.class))).thenReturn(existingCharacter);
+
+        Character result = characterService.updateCharacter(1L, characterJson, null);
+
+        assertNotNull(result);
+        assertEquals(updatedName, result.getName());
+        verify(characterRepository, times(1)).save(any(Character.class));
+        verify(gameService, never()).saveGameImage(any(MultipartFile.class));
+    }
+
+    @Test
+    void testUpdateCharacter_InvalidJson() {
+        String invalidCharacterJson = "{invalid json}";
+
+        when(characterRepository.findById(1L)).thenReturn(Optional.of(new Character()));
+
+        assertThrows(Exception.class, () -> {
+            characterService.updateCharacter(1L, invalidCharacterJson, image);
+        });
+    }
+
+    @Test
+    void testUpdateCharacter_CharacterNotFound() {
+        String characterJson = "{}"; // 空的 JSON 字符串，模拟无效输入
+
+        // 模拟角色未找到的情况
+        when(characterRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // 确保抛出 RuntimeException
+        assertThrows(RuntimeException.class, () -> {
+            characterService.updateCharacter(1L, characterJson, image);
+        });
+    }
+
+    @Test
     void testDeleteCharacter() {
         when(characterRepository.findById(1L)).thenReturn(Optional.of(character));
 
@@ -118,5 +185,25 @@ class CharacterServiceTest {
         verify(gameService, times(1)).deleteGameImage(character.getImage());
         verify(characterRepository, times(1)).deleteById(1L);
     }
-}
 
+    @Test
+    void testDeleteCharacter_CharacterNotFound() {
+        // 模拟角色未找到的情况
+        when(characterRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // 调用 deleteCharacter 方法
+        characterService.deleteCharacter(1L);
+
+        // 验证没有调用删除图像或删除角色的操作
+        verify(gameService, never()).deleteGameImage(anyString());
+        verify(characterRepository, never()).deleteById(anyLong());
+    }
+
+
+
+
+
+
+
+
+}

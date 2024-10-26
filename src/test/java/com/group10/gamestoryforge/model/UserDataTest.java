@@ -17,6 +17,7 @@ class UserDataTest {
     @BeforeEach
     void setUp() {
         user = new UserData();
+        user.setUserId(1L); // 设置 userId
         user.setUsername("testUser");
         user.setPassword("password123");
         user.setRole("USER");
@@ -40,6 +41,7 @@ class UserDataTest {
     @Test
     void testUserCreation() {
         assertNotNull(user);
+        assertEquals(1L, user.getUserId()); // 验证 userId
         assertEquals("testUser", user.getUsername());
         assertEquals("password123", user.getPassword());
         assertEquals("USER", user.getRole());
@@ -71,5 +73,12 @@ class UserDataTest {
         assertEquals(1, user.getGames().size());
         assertFalse(user.getGames().contains(game1));
     }
+
+    @Test
+    void testSetAndGetUserId() {
+        user.setUserId(2L); // 设置新的 userId
+        assertEquals(2L, user.getUserId()); // 验证新的 userId
+    }
 }
+
 
