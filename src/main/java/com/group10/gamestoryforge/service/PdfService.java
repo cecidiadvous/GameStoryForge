@@ -19,8 +19,8 @@ import java.util.List;
 public class PdfService {
 
     // 定义 API 用户名和 API 密钥
-    private static final String API_USERNAME = "demo"; // 替换为你的用户名
-    private static final String API_KEY = "ce544b6ea52a5621fb9d55f8b542d14d"; // 替换为你的 API 密钥
+    private static final String API_USERNAME = "suoyi"; // 替换为你的用户名
+    private static final String API_KEY = "fdeff2703fe7b1cfbfc3c8aa9a03af70"; // 替换为你的 API 密钥
 
     @Autowired
     private GameRepository gameRepository; // 注入 GameRepository 来获取游戏数据

@@ -44,13 +44,19 @@ public class StoryService {
                 .collect(Collectors.joining(", "));
 
         // Concatenate characters string with storyDescription
-        String fullStoryDescription = "previously generated dialogues and storyline:" + previousStorylines
+        String fullStoryDescription = "previously generated dialogues and storyline:"
+                + previousStorylines
                 + " Brief game chapter story summary: " + storyDescription
                 + " Characters: " + charactersString;
 
         List<Message> messagesList = new ArrayList<>();
         messagesList.add(new Message("system",
-                "You are an AI capable of generating detailed game storyline(1,300 to 1,700 words) and including character dialogues based on the game characters and brief chapter summaries I provide..."
+                "You are an AI capable of generating detailed game storyline(1,000 to 1,200 words) and including character dialogues based on the game characters and brief chapter summaries I provide." +
+                        "The storyline should include the game's background, world-building, key events, quests, and character development." +
+                        "In each chapter, you will generate an engaging, immersive third-person storyline of 1,300 to 1,700 words, with characters that have distinctive personalities." +
+                        "The characters' dialogues should be naturally integrated into the story and reflect their traits." +
+                        "The output language should be consistent with the input language provided by the user, and all punctuation should follow the rules of that language." +
+                        "If this is not the first chapter, I will provide the previously generated dialogues and storyline, and you need to maintain the continuity and consistency of the story based on these."
         ));
 
         messagesList.add(new Message("user", fullStoryDescription));
